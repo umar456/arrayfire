@@ -13,6 +13,7 @@
 
 #include <complex>
 #include <af/defines.h>
+#include <af/complex.h>
 
 namespace af {
 

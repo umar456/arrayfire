@@ -36,24 +36,15 @@
 
 #include <cstddef>
 
-#ifdef __cplusplus
-#include <complex>
-
-typedef std::complex<float> af_cfloat;
-typedef std::complex<double> af_cdouble;
-
-#else
 typedef struct {
 	float x;
 	float y;
-} af_cfloat;
+} af_float2;
 
 typedef struct {
 	double x;
 	double y;
-} af_cdouble;
-
-#endif
+} af_double2;
 
 typedef enum {
     AF_SUCCESS=0,
@@ -116,8 +107,6 @@ typedef enum {
 #ifdef __cplusplus
 namespace af
 {
-    typedef af_cfloat cfloat;
-    typedef af_cdouble  cdouble;
     typedef af_dtype dtype;
     typedef af_source source;
     typedef af_interp_type interpType;

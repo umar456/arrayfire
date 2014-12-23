@@ -10,4 +10,18 @@
 #pragma once
 
 #include <af/traits.hpp>
+namespace af {
+
+template<>
+struct dtype_traits<std::complex<float> > {
+    enum { af_type = c32 };
+};
+
+template<>
+struct dtype_traits<std::complex<double> > {
+    enum { af_type = c64 };
+};
+
+}
+
 using af::dtype_traits;

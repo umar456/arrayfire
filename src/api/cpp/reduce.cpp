@@ -71,8 +71,7 @@ namespace af
     {                                                       \
         double rval, ival;                                  \
         AF_THROW(af_##fn##_all(&rval, &ival, in.get()));    \
-        T out = {(Tr)rval, (Tr)ival};                       \
-        return out;                                         \
+        return T((Tr)rval, (Tr)ival);                       \
     }                                                       \
 
 #define INSTANTIATE(fn)                         \
@@ -82,8 +81,8 @@ namespace af
     INSTANTIATE_REAL(fn, unsigned)              \
     INSTANTIATE_REAL(fn, char)                  \
     INSTANTIATE_REAL(fn, unsigned char)         \
-    INSTANTIATE_CPLX(fn, af_cfloat, float)      \
-    INSTANTIATE_CPLX(fn, af_cdouble, double)    \
+    INSTANTIATE_CPLX(fn, cfloat, float)         \
+    INSTANTIATE_CPLX(fn, cdouble, double)       \
 
     INSTANTIATE(sum)
     INSTANTIATE(min)
