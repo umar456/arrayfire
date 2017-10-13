@@ -79,7 +79,7 @@ void* memAllocUser(const size_t &bytes)
 template<typename T>
 void memFree(T *ptr)
 {
-    return memoryManager().unlock((void *)ptr, false);
+    memoryManager().unlock((void *)ptr, false);
 }
 
 void memFreeUser(void *ptr)

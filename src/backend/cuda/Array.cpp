@@ -46,7 +46,7 @@ namespace cuda
     template<typename T>
     Array<T>::Array(af::dim4 dims, const T * const in_data, bool is_device, bool copy_device) :
         info(getActiveDeviceId(), dims, 0, calcStrides(dims), (af_dtype)dtype_traits<T>::af_type),
-        data(((is_device & !copy_device) ? (T *)in_data : memAlloc<T>(dims.elements()).release()), memFree<T>),
+        data(((is_device & !copy_device) ? const_cast<T*>(in_data) : memAlloc<T>(dims.elements()).release()), memFree<T>),
         data_dims(dims),
         node(bufferNodePtr<T>()), ready(true), owner(true)
     {
@@ -80,7 +80,7 @@ namespace cuda
              0,
              af::dim4(tmp.strides[0], tmp.strides[1], tmp.strides[2], tmp.strides[3]),
              (af_dtype)dtype_traits<T>::af_type),
-        data(tmp.ptr, owner_ ? memFree<T> : [](T*){}),
+        data(tmp.ptr, owner_ ? std::function<void(T*)>(memFree<T>) : std::function<void(T*)>([](T*){})),
         data_dims(af::dim4(tmp.dims[0], tmp.dims[1], tmp.dims[2], tmp.dims[3])),
         node(bufferNodePtr<T>()), ready(true), owner(owner_)
     {
