@@ -41,10 +41,16 @@ target_sources(af
     ${CMAKE_SOURCE_DIR}/src/backend/common/util.cpp
   )
 
-target_compile_definitions(af
-  PRIVATE
-    AFDLL
-  )
+arrayfire_set_default_cxx_flags(af)
+if(WIN32)
+  target_sources(af
+    PRIVATE
+      ${CMAKE_SOURCE_DIR}/src/backend/common/module_loading_windows.cpp)
+else()
+  target_sources(af
+    PRIVATE
+      ${CMAKE_SOURCE_DIR}/src/backend/common/module_loading_unix.cpp)
+endif()
 
 target_include_directories(af
   PUBLIC
