@@ -388,6 +388,7 @@ target_compile_definitions(afopencl
   PRIVATE
     CL_USE_DEPRECATED_OPENCL_1_2_APIS
     __CL_ENABLE_EXCEPTIONS
+    AF_OPENCL
   )
 
 target_link_libraries(afopencl
