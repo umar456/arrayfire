@@ -332,6 +332,7 @@ target_sources(afopencl
   PRIVATE
     JIT/BinaryNode.hpp
     JIT/BufferNode.hpp
+    JIT/Node.cpp
     JIT/Node.hpp
     JIT/ScalarNode.hpp
     JIT/UnaryNode.hpp

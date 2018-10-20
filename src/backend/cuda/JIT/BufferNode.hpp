@@ -10,8 +10,12 @@
 #pragma once
 #include "../Param.hpp"
 #include "Node.hpp"
-#include <iomanip>
 #include <mutex>
+
+#pragma push
+#pragma diag_suppress = code_is_unreachable
+#include <spdlog/fmt/ostr.h>
+#pragma pop
 
 namespace cuda
 {
@@ -59,19 +63,12 @@ namespace JIT
             return m_linear_buffer && same_dims;
         }
 
-        void genKerName(std::stringstream &kerStream, Node_ids ids) const final
-        {
-            kerStream << "_" << m_name_str;
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
-        }
-
         void genParams(std::stringstream &kerStream, int id, bool is_linear) const final
         {
             if (is_linear) {
-                kerStream << m_type_str << " *in" << id << "_ptr,\n";
+                fmt::print(kerStream, "{0} *in{1}_ptr,\n", m_type_str, id);
             } else {
-                kerStream << "Param<" << m_type_str << "> in" << id
-                          << ",\n";
+                fmt::print(kerStream, "Param<{0}> in{1},\n", m_type_str, id);
             }
         }
 
@@ -86,31 +83,23 @@ namespace JIT
 
         void genOffsets(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            std::string idx_str = std::string("int idx") + std::to_string(id);
-
             if (is_linear) {
-                kerStream << idx_str << " = idx;\n";
+                fmt::print(kerStream, "int idx{0} = idx;\n", id);
             } else {
-                std::string info_str = std::string("in") + std::to_string(id);
-                kerStream << idx_str << " = "
-                          << "(id3 < " << info_str << ".dims[3]) * "
-                          << info_str << ".strides[3] * id3 + "
-                          << "(id2 < " << info_str << ".dims[2]) * "
-                          << info_str << ".strides[2] * id2 + "
-                          << "(id1 < " << info_str << ".dims[1]) * "
-                          << info_str << ".strides[1] * id1 + "
-                          << "(id0 < " << info_str << ".dims[0]) * "
-                          << "id0;"
-                          << "\n";
-                kerStream << m_type_str << " *in" << id << "_ptr = in" << id << ".ptr;\n";
+                fmt::print(kerStream,
+                          "int idx{0} = "
+                          "(id3 < in{0}.dims[3]) * in{0}.strides[3] * id3 + "
+                          "(id2 < in{0}.dims[2]) * in{0}.strides[2] * id2 + "
+                          "(id1 < in{0}.dims[1]) * in{0}.strides[1] * id1 + "
+                          "(id0 < in{0}.dims[0]) * in{0}.strides[0] * id0;\n"
+                           "{1} *in{0}_ptr = in{0}.ptr;\n", id, m_type_str);
             }
         }
 
         void genFuncs(std::stringstream &kerStream, Node_ids ids) const final
         {
-            kerStream << m_type_str << " val" << ids.id << " = "
-                      << "in" << ids.id << "_ptr[idx" << ids.id << "];"
-                      << "\n";
+            fmt::print(kerStream, "{0} val{1} = in{1}_ptr[idx{1}];\n",
+                       m_type_str, ids.id);
         }
 
         void getInfo(unsigned &len, unsigned &buf_count, unsigned &bytes) const final

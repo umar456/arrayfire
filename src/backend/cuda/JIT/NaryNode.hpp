@@ -9,7 +9,11 @@
 
 #pragma once
 #include "Node.hpp"
-#include <iomanip>
+
+#pragma push
+#pragma diag_suppress = code_is_unreachable
+#include <spdlog/fmt/ostr.h>
+#pragma pop
 
 namespace cuda
 {
@@ -41,19 +45,18 @@ namespace JIT
         void genKerName(std::stringstream &kerStream, Node_ids ids) const final
         {
             // Make the dec representation of enum part of the Kernel name
-            kerStream << "_" << std::setw(3) << std::setfill('0') << std::dec << m_op;
+            fmt::print(kerStream, "_{0:0<3}", m_op);
             for (int i = 0; i < m_num_children; i++) {
-                kerStream << std::setw(3)
-                          << std::setfill('0')
-                          << std::dec
-                          << ids.child_ids[i];
+                fmt::print(kerStream, "_{0:0<3}", ids.child_ids[i]);
             }
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
+            fmt::print(kerStream, "_{0:0<3}", ids.id);
         }
+
 
         void genFuncs(std::stringstream &kerStream, Node_ids ids) const final
         {
-            kerStream << m_type_str << " val" << ids.id << " = " << m_op_str << "(";
+            fmt::print(kerStream, "{0} val{1} = {2}(\n", m_type_str, ids.id, m_op_str);
+
             for (int i = 0; i < m_num_children; i++) {
                 if (i > 0) kerStream << ", ";
                 kerStream << "val" << ids.child_ids[i];

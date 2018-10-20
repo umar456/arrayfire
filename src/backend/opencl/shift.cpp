@@ -7,11 +7,22 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 
-#include <JIT/ShiftNode.hpp>
 #include <Array.hpp>
+#include <JIT/BufferNode.hpp>
+#include <JIT/ShiftNode.hpp>
 #include <shift.hpp>
 #include <stdexcept>
 #include <err_opencl.hpp>
+
+using af::dim4;
+
+using opencl::JIT::BufferNode;
+using opencl::JIT::ShiftNode;
+
+using std::array;
+using std::make_shared;
+using std::static_pointer_cast;
+using std::string;
 
 namespace opencl
 {
@@ -22,12 +33,12 @@ namespace opencl
         // Force input to be evaluated so that in is always a buffer.
         in.eval();
 
-        std::string name_str("Sh");
+        string name_str("Sh");
         name_str += shortname<T>(true);
         const af::dim4 iDims = in.dims();
-        af::dim4 oDims = iDims;
+        dim4 oDims = iDims;
 
-        std::array<int, 4> shifts;
+        array<int, 4> shifts;
         for(int i = 0; i < 4; i++) {
             // sdims_[i] will always be positive and always [0, oDims[i]].
             // Negative shifts are converted to position by going the other way round
@@ -35,13 +46,13 @@ namespace opencl
             assert(shifts[i] >= 0 && shifts[i] <= oDims[i]);
         }
 
-        auto node = new JIT::ShiftNode(dtype_traits<T>::getName(), name_str.c_str(),
-                                       in.getNode(), shifts);
-        return createNodeArray<T>(oDims, JIT::Node_ptr(node));
+        auto node = make_shared<ShiftNode>(dtype_traits<T>::getName(), name_str.c_str(),
+                                           static_pointer_cast<BufferNode>(in.getNode()), shifts);
+        return createNodeArray<T>(oDims, node);
     }
 
 #define INSTANTIATE(T)                                                  \
-    template Array<T> shift<T>(const Array<T> &in, const int sdims[4]);     \
+    template Array<T> shift<T>(const Array<T> &in, const int sdims[4]); \
 
     INSTANTIATE(float)
     INSTANTIATE(double)

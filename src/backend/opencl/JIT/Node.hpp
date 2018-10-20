@@ -8,16 +8,15 @@
  ********************************************************/
 
 #pragma once
+
 #include <platform.hpp>
 #include <optypes.hpp>
-#include <array>
-#include <string>
-#include <vector>
-#include <memory>
-#include <unordered_map>
 
-using std::shared_ptr;
-using std::vector;
+#include <array>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace common {
     class NodeIterator;
@@ -38,7 +37,7 @@ namespace JIT
         std::array<int, MAX_CHILDREN> child_ids;
     } Node_ids;
 
-    using Node_ptr = shared_ptr<Node>;
+    using Node_ptr = std::shared_ptr<Node>;
     using Node_map_t = std::unordered_map<const Node *, int>;
     using Node_map_iter = Node_map_t::iterator;
 
@@ -64,29 +63,13 @@ namespace JIT
         {}
 
         int getNodesMap(Node_map_t &node_map,
-                        vector<const Node *> &full_nodes,
-                        vector<Node_ids> &full_ids) const
-        {
-            auto iter = node_map.find(this);
-            if (iter == node_map.end()) {
-                Node_ids ids;
-                for (int i = 0; i < MAX_CHILDREN && m_children[i] != nullptr; i++) {
-                    ids.child_ids[i] = m_children[i]->getNodesMap(node_map, full_nodes, full_ids);
-                }
-                ids.id = node_map.size();
-                node_map[this] = ids.id;
-                full_nodes.push_back(this);
-                full_ids.push_back(ids);
-                return ids.id;
-            }
-            return iter->second;
-        }
+                        std::vector<const Node *> &full_nodes,
+                        std::vector<Node_ids> &full_ids) const;
 
-        virtual void genKerName(std::stringstream &kerStream, Node_ids ids) const {}
+        virtual void genKerName(std::stringstream &kerStream, Node_ids ids) const;
         virtual void genParams  (std::stringstream &kerStream, int id, bool is_linear) const {}
         virtual void genOffsets (std::stringstream &kerStream, int id, bool is_linear) const {}
         virtual void genFuncs   (std::stringstream &kerStream, Node_ids) const {}
-
         virtual int setArgs (cl::Kernel &ker, int id, bool is_linear) const { return id; }
 
         virtual void getInfo(unsigned &len, unsigned &buf_count, unsigned &bytes) const
@@ -101,9 +84,10 @@ namespace JIT
         }
 
         virtual bool isLinear(dim_t dims[4]) const { return true; }
+        virtual size_t getBytes() const { return 0; }
+
         std::string getTypeStr() const { return m_type_str; }
         int getHeight() const  { return m_height; }
-        virtual size_t getBytes() const { return 0; }
         std::string getNameStr() const { return m_name_str; }
 
         virtual ~Node() {}

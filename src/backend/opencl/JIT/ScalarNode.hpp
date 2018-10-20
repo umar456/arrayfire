@@ -11,7 +11,8 @@
 #include "Node.hpp"
 #include <math.hpp>
 #include <types.hpp>
-#include <iomanip>
+
+#include <spdlog/fmt/ostr.h>
 
 namespace opencl
 {
@@ -33,15 +34,9 @@ namespace JIT
         {
         }
 
-        void genKerName(std::stringstream &kerStream, Node_ids ids) const final
-        {
-            kerStream << "_" << m_name_str;
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
-        }
-
         void genParams(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            kerStream << m_type_str << " scalar" << id << ", " << "\n";
+            fmt::print(kerStream, "{0} scalar{1},\n", m_type_str, id);
         }
 
         int setArgs(cl::Kernel &ker, int id, bool is_linear) const final
@@ -52,9 +47,7 @@ namespace JIT
 
         void genFuncs(std::stringstream &kerStream, Node_ids ids) const final
         {
-            kerStream << m_type_str << " val" << ids.id << " = "
-                      << "scalar" << ids.id << ";"
-                      << "\n";
+            fmt::print(kerStream, "{0} val{1} = scalar{1};\n", m_type_str, ids.id);
         }
 
         // Return the info for the params and the size of the buffers

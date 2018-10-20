@@ -21,6 +21,7 @@
 #include <debug_opencl.hpp>
 #include <cache.hpp>
 #include <type_util.hpp>
+#include <optypes.hpp>
 
 using cl::Buffer;
 using cl::Program;

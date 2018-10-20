@@ -8,21 +8,26 @@
  ********************************************************/
 
 #pragma once
-#include <platform.hpp>
-#include <af/dim4.hpp>
-#include <common/ArrayInfo.hpp>
-#include <traits.hpp>
-#include <backend.hpp>
-#include <types.hpp>
-#include <traits.hpp>
 #include <Param.hpp>
-#include <JIT/Node.hpp>
+#include <af/dim4.hpp>
+#include <backend.hpp>
+#include <common/ArrayInfo.hpp>
+#include <err_opencl.hpp>
 #include <memory.hpp>
 #include <memory>
-#include <err_opencl.hpp>
+#include <platform.hpp>
+#include <traits.hpp>
+#include <traits.hpp>
+#include <types.hpp>
+
+
 
 namespace opencl
 {
+    namespace JIT {
+        class Node;
+        using Node_ptr = std::shared_ptr<Node>;
+    }
     typedef std::shared_ptr<cl::Buffer> Buffer_ptr;
     using af::dim4;
     template<typename T> class Array;

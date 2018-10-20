@@ -19,15 +19,12 @@
 namespace common {
     class NodeIterator;
 }
-using std::shared_ptr;
-using std::vector;
 
 namespace cuda
 {
 
 namespace JIT
 {
-
     constexpr int MAX_CHILDREN = 3;
     class Node;
 
@@ -37,7 +34,7 @@ namespace JIT
         std::array<int, MAX_CHILDREN> child_ids;
     } Node_ids;
 
-    using Node_ptr = shared_ptr<Node>;
+    using Node_ptr = std::shared_ptr<Node>;
     using Node_map_t = std::unordered_map<const Node *, int> ;
     using Node_map_iter = Node_map_t::iterator;
 
@@ -60,10 +57,10 @@ namespace JIT
               m_height(height) {}
 
         int getNodesMap(Node_map_t &node_map,
-                        vector<const Node *> &full_nodes,
-                        vector<Node_ids> &full_ids) const;
+                        std::vector<const Node *> &full_nodes,
+                        std::vector<Node_ids> &full_ids) const;
 
-        virtual void genKerName (std::stringstream &kerStream, Node_ids ids) const {}
+        virtual void genKerName (std::stringstream &kerStream, Node_ids ids) const;
         virtual void genParams  (std::stringstream &kerStream, int id, bool is_linear) const {}
         virtual void genOffsets (std::stringstream &kerStream, int id, bool is_linear) const {}
         virtual void genFuncs   (std::stringstream &kerStream, Node_ids) const {}

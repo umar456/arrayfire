@@ -11,8 +11,11 @@
 #include <af/defines.h>
 #include "../kernel/KParam.hpp"
 #include "Node.hpp"
+
+#include <spdlog/fmt/ostr.h>
+
 #include <iomanip>
-#include <mutex>
+#include <memory>
 
 namespace opencl
 {
@@ -61,20 +64,16 @@ namespace JIT
             return m_linear_buffer && same_dims;
         }
 
-        void genKerName(std::stringstream &kerStream, Node_ids ids) const final
-        {
-            kerStream << "_" << m_name_str;
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
-        }
-
         void genParams(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            if (!is_linear) {
-                kerStream << "__global " << m_type_str << " *in" << id
-                          << ", KParam iInfo" << id << ", " << "\n";
+            if (is_linear) {
+                fmt::print(kerStream,
+                          "__global {0} *in{1}, dim_t iInfo{1}_offset,\n",
+                          m_type_str, id);
             } else {
-                kerStream << "__global " << m_type_str << " *in" << id
-                          << ", dim_t iInfo" << id << "_offset, " << "\n";
+                fmt::print(kerStream,
+                          "__global {0} *in{1}, KParam iInfo{1},\n",
+                          m_type_str, id);
             }
         }
 
@@ -91,22 +90,16 @@ namespace JIT
 
         void genOffsets(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            std::string idx_str = std::string("int idx") + std::to_string(id);
-            std::string info_str = std::string("iInfo") + std::to_string(id);
-
-            if (!is_linear) {
-                kerStream << idx_str << " = "
-                          << "(id3 < " << info_str << ".dims[3]) * "
-                          << info_str << ".strides[3] * id3 + "
-                          << "(id2 < " << info_str << ".dims[2]) * "
-                          << info_str << ".strides[2] * id2 + "
-                          << "(id1 < " << info_str << ".dims[1]) * "
-                          << info_str << ".strides[1] * id1 + "
-                          << "(id0 < " << info_str << ".dims[0]) * "
-                          << "id0 + " << info_str << ".offset;"
-                          << "\n";
+            if (is_linear) {
+                fmt::print(kerStream, "int idx{0} = idx + iInfo{0}_offset;\n", id);
             } else {
-                kerStream << idx_str << " = idx + " << info_str << "_offset;" << "\n";
+                fmt::print(kerStream,
+                          "int idx{0} = "
+                          "(id3 < iInfo{0}.dims[3]) * iInfo{0}.strides[3] * id3 + "
+                          "(id2 < iInfo{0}.dims[2]) * iInfo{0}.strides[2] * id2 + "
+                          "(id1 < iInfo{0}.dims[1]) * iInfo{0}.strides[1] * id1 + "
+                          "(id0 < iInfo{0}.dims[0]) * iInfo{0}.strides[0] * id0 + "
+                          "iInfo{0}.offset;\n", id);
             }
         }
 
@@ -118,9 +111,7 @@ namespace JIT
 
         void genFuncs(std::stringstream &kerStream, Node_ids ids) const final
         {
-            kerStream << m_type_str << " val" << ids.id << " = "
-                      << "in" << ids.id << "[idx" << ids.id << "];"
-                      << "\n";
+            fmt::print(kerStream, "{0} val{1} = in{1}[idx{1}];\n", m_type_str, ids.id);
         }
 
         void getInfo(unsigned &len, unsigned &buf_count, unsigned &bytes) const final

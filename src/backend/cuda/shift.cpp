@@ -7,11 +7,22 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 
-#include <JIT/ShiftNode.hpp>
 #include <Array.hpp>
+#include <JIT/BufferNode.hpp>
+#include <JIT/ShiftNode.hpp>
 #include <shift.hpp>
 #include <stdexcept>
 #include <err_cuda.hpp>
+
+using af::dim4;
+
+using cuda::JIT::BufferNode;
+using cuda::JIT::ShiftNode;
+
+using std::array;
+using std::make_shared;
+using std::static_pointer_cast;
+using std::string;
 
 namespace cuda
 {
@@ -23,12 +34,12 @@ namespace cuda
         // Force input to be evaluated so that in is always a buffer.
         in.eval();
 
-        std::string name_str("Sh");
+        string name_str("Sh");
         name_str += shortname<T>(true);
         const af::dim4 iDims = in.dims();
-        af::dim4 oDims = iDims;
+        dim4 oDims = iDims;
 
-        std::array<int, 4> shifts;
+        array<int, 4> shifts;
         for(int i = 0; i < 4; i++) {
             // sdims_[i] will always be positive and always [0, oDims[i]].
             // Negative shifts are converted to position by going the other way round
@@ -36,8 +47,9 @@ namespace cuda
             assert(shifts[i] >= 0 && shifts[i] <= oDims[i]);
         }
 
-        auto node = new JIT::ShiftNode<T>(getFullName<T>(), name_str.c_str(),
-                                          in.getNode(), shifts);
+        auto node = make_shared<ShiftNode<T>>(getFullName<T>(), name_str.c_str(),
+                                              static_pointer_cast<BufferNode<T>>(in.getNode()),
+                                              shifts);
         return createNodeArray<T>(oDims, JIT::Node_ptr(node));
     }
 

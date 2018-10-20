@@ -10,8 +10,10 @@
 #pragma once
 #include "BufferNode.hpp"
 #include "Node.hpp"
+#include <spdlog/fmt/ostr.h>
+
 #include <iomanip>
-#include <mutex>
+#include <memory>
 
 namespace opencl
 {
@@ -22,14 +24,14 @@ namespace JIT
     {
     private:
 
-        Node_ptr m_buffer_node;
+        std::shared_ptr<BufferNode> m_buffer_node;
         const std::array<int, 4> m_shifts;
 
     public:
 
         ShiftNode(const char *type_str,
                   const char *name_str,
-                  Node_ptr buffer_node,
+                  std::shared_ptr<BufferNode> buffer_node,
                   const std::array<int, 4> shifts)
             : Node(type_str, name_str, 0, {}),
               m_buffer_node(buffer_node),
@@ -39,8 +41,7 @@ namespace JIT
 
         void setData(KParam info, std::shared_ptr<cl::Buffer> data, const unsigned bytes, bool is_linear)
         {
-            auto node_ptr = m_buffer_node.get();
-            dynamic_cast<BufferNode *>(node_ptr)->setData(info, data, bytes, is_linear);
+            m_buffer_node->setData(info, data, bytes, is_linear);
         }
 
         bool isLinear(dim_t dims[4]) const final
@@ -48,25 +49,19 @@ namespace JIT
             return false;
         }
 
-        void genKerName(std::stringstream &kerStream, Node_ids ids) const final
-        {
-            kerStream << "_" << m_name_str;
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
-        }
-
         void genParams(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            auto node_ptr = m_buffer_node.get();
-            dynamic_cast<BufferNode *>(node_ptr)->genParams(kerStream, id, is_linear);
-            for (int i = 0; i < 4; i++) {
-                kerStream << "int shift" << id << "_" << i << ",\n";
-            }
+            m_buffer_node->genParams(kerStream, id, is_linear);
+            fmt::print(kerStream,
+                       "int shift{0}_0,\n"
+                       "int shift{0}_1,\n"
+                       "int shift{0}_2,\n"
+                       "int shift{0}_3,\n", id);
         }
 
         int setArgs(cl::Kernel &ker, int id, bool is_linear) const final
         {
-            auto node_ptr = m_buffer_node.get();
-            int curr_id = dynamic_cast<BufferNode *>(node_ptr)->setArgs(ker, id, is_linear);
+            int curr_id = m_buffer_node->setArgs(ker, id, is_linear);
             for (int i = 0; i < 4; i++) {
                 ker.setArg(curr_id + i, m_shifts[i]);
             }
@@ -75,45 +70,26 @@ namespace JIT
 
         void genOffsets(std::stringstream &kerStream, int id, bool is_linear) const final
         {
-            std::string idx_str = std::string("idx") + std::to_string(id);
-            std::string info_str = std::string("iInfo") + std::to_string(id);
-            std::string id_str = std::string("sh_id_") + std::to_string(id) + "_";
-            std::string shift_str = std::string("shift") + std::to_string(id) + "_";
-
-            for (int i = 0; i < 4; i++) {
-                kerStream << "int " << id_str << i
-                          << " = __circular_mod(id" << i
-                          << " + " << shift_str << i
-                          << ", " << info_str << ".dims[" << i << "]"
-                          << ");\n";
-            }
-
-            kerStream << "int " << idx_str << " = "
-                      << "(" << id_str << "3 < " << info_str << ".dims[3]) * "
-                      << info_str << ".strides[3] * " << id_str << "3;\n";
-            kerStream << idx_str  << " += "
-                      << "(" << id_str << "2 < " << info_str << ".dims[2]) * "
-                      << info_str << ".strides[2] * " << id_str << "2;\n";
-            kerStream << idx_str  << " += "
-                      << "(" << id_str << "1 < " << info_str << ".dims[1]) * "
-                      << info_str << ".strides[1] * " << id_str << "1;\n";
-            kerStream << idx_str  << " += "
-                      << "(" << id_str << "0 < " << info_str << ".dims[0]) * "
-                      << id_str << "0 + " << info_str << ".offset;"
-                      << "\n";
+             fmt::print(kerStream, R"Shift(
+             int sh_id_{0}_0 = __circular_mod(id0 + shift{0}_0, iInfo{0}.dims[0]);
+             int sh_id_{0}_1 = __circular_mod(id1 + shift{0}_1, iInfo{0}.dims[1]);
+             int sh_id_{0}_2 = __circular_mod(id2 + shift{0}_2, iInfo{0}.dims[2]);
+             int sh_id_{0}_3 = __circular_mod(id3 + shift{0}_3, iInfo{0}.dims[3]);
+             int idx{0} = (sh_id_{0}_3 < iInfo{0}.dims[3]) * iInfo{0}.strides[3] * sh_id_{0}_3;
+             idx{0} += (sh_id_{0}_2 < iInfo{0}.dims[2]) * iInfo{0}.strides[2] * sh_id_{0}_2;
+             idx{0} += (sh_id_{0}_1 < iInfo{0}.dims[1]) * iInfo{0}.strides[1] * sh_id_{0}_1;
+             idx{0} += (sh_id_{0}_0 < iInfo{0}.dims[0]) * sh_id_{0}_0 + iInfo{0}.offset;)Shift" "\n", id);
         }
 
         void genFuncs(std::stringstream &kerStream, Node_ids ids) const final
         {
-            kerStream << m_type_str << " val" << ids.id << " = "
-                      << "in" << ids.id << "[idx" << ids.id << "];"
-                      << "\n";
+            fmt::print(kerStream, "{0} val{1} = in{1}[idx{1}];\n",
+                       m_type_str, ids.id);
         }
 
         void getInfo(unsigned &len, unsigned &buf_count, unsigned &bytes) const final
         {
-            auto node_ptr = m_buffer_node.get();
-            dynamic_cast<BufferNode *>(node_ptr)->getInfo(len, buf_count, bytes);
+            m_buffer_node->getInfo(len, buf_count, bytes);
         }
     };
 }

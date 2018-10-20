@@ -40,7 +40,7 @@ class NodeIterator : public std::iterator<std::input_iterator_tag, detail::JIT::
     ///
     /// \param[in] root The root node of the tree
     NodeIterator(pointer root) : tree{root}, index(0) {
-        tree.reserve(root->getHeight()*4);
+        tree.reserve(root->getHeight()*5);
     }
 
     /// The equality operator
