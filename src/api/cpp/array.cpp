@@ -139,7 +139,7 @@ namespace af
         dim_t my_dims[] = {d0, d1, d2, d3};
         switch (src) {
         case afHost:   AF_THROW(af_create_array(arr, (const void * const)ptr, AF_MAX_DIMS, my_dims, ty)); break;
-        case afDevice: AF_THROW(af_device_array(arr, (const void *      )ptr, AF_MAX_DIMS, my_dims, ty)); break;
+        case afDevice: AF_THROW(af_device_array(arr, (void *)ptr, AF_MAX_DIMS, my_dims, ty)); break;
         default: AF_THROW_ERR("Can not create array from the requested source pointer",
                               AF_ERR_ARG);
         }
