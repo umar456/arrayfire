@@ -128,10 +128,8 @@ af_err af_create_sparse_array(af_array *out, const dim_t nRows,
 
 template<typename T>
 af_array createSparseArrayFromPtr(const af::dim4 &dims, const dim_t nNZ,
-                                  const T *const values,
-                                  const int *const rowIdx,
-                                  const int *const colIdx,
-                                  const af::storage stype,
+                                  T *const values, int *const rowIdx,
+                                  int *const colIdx, const af::storage stype,
                                   const af::source source) {
     SparseArray<T> sparse = createEmptySparseArray<T>(dims, nNZ, stype);
 
@@ -147,10 +145,12 @@ af_array createSparseArrayFromPtr(const af::dim4 &dims, const dim_t nNZ,
     return getHandle(sparse);
 }
 
-af_err af_create_sparse_array_from_ptr(
-    af_array *out, const dim_t nRows, const dim_t nCols, const dim_t nNZ,
-    const void *const values, const int *const rowIdx, const int *const colIdx,
-    const af_dtype type, const af_storage stype, const af_source source) {
+af_err af_create_sparse_array_from_ptr(af_array *out, const dim_t nRows,
+                                       const dim_t nCols, const dim_t nNZ,
+                                       void *const values, int *const rowIdx,
+                                       int *const colIdx, const af_dtype type,
+                                       const af_storage stype,
+                                       const af_source source) {
     try {
         // Checks:
         // rowIdx and colIdx arrays are of s32 type
@@ -174,22 +174,22 @@ af_err af_create_sparse_array_from_ptr(
         switch (type) {
             case f32:
                 output = createSparseArrayFromPtr<float>(
-                    dims, nNZ, static_cast<const float *>(values), rowIdx,
+                    dims, nNZ, static_cast<float *>(values), rowIdx,
                     colIdx, stype, source);
                 break;
             case f64:
                 output = createSparseArrayFromPtr<double>(
-                    dims, nNZ, static_cast<const double *>(values), rowIdx,
+                    dims, nNZ, static_cast<double *>(values), rowIdx,
                     colIdx, stype, source);
                 break;
             case c32:
                 output = createSparseArrayFromPtr<cfloat>(
-                    dims, nNZ, static_cast<const cfloat *>(values), rowIdx,
+                    dims, nNZ, static_cast<cfloat *>(values), rowIdx,
                     colIdx, stype, source);
                 break;
             case c64:
                 output = createSparseArrayFromPtr<cdouble>(
-                    dims, nNZ, static_cast<const cdouble *>(values), rowIdx,
+                    dims, nNZ, static_cast<cdouble *>(values), rowIdx,
                     colIdx, stype, source);
                 break;
             default: TYPE_ERROR(1, type);

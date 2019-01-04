@@ -25,8 +25,9 @@ array sparse(const dim_t nRows, const dim_t nCols, const dim_t nNZ,
              const int *const colIdx, const dtype type, const af::storage stype,
              const af::source src) {
     af_array out = 0;
-    AF_THROW(af_create_sparse_array_from_ptr(&out, nRows, nCols, nNZ, values,
-                                             rowIdx, colIdx, type, stype, src));
+    AF_THROW(af_create_sparse_array_from_ptr(&out, nRows, nCols, nNZ,
+                                             const_cast<void *>(values), const_cast<int*>(rowIdx),
+                                             const_cast<int*>(colIdx), type, stype, src));
     return array(out);
 }
 

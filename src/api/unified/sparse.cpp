@@ -18,10 +18,12 @@ af_err af_create_sparse_array(af_array *out, const dim_t nRows,
     return CALL(out, nRows, nCols, values, rowIdx, colIdx, stype);
 }
 
-af_err af_create_sparse_array_from_ptr(
-    af_array *out, const dim_t nRows, const dim_t nCols, const dim_t nNZ,
-    const void *const values, const int *const rowIdx, const int *const colIdx,
-    const af_dtype type, const af_storage stype, const af_source source) {
+af_err af_create_sparse_array_from_ptr(af_array *out, const dim_t nRows,
+                                       const dim_t nCols, const dim_t nNZ,
+                                       void *const values, int *const rowIdx,
+                                       int *const colIdx, const af_dtype type,
+                                       const af_storage stype,
+                                       const af_source source) {
     return CALL(out, nRows, nCols, nNZ, values, rowIdx, colIdx, type, stype,
                 source);
 }
