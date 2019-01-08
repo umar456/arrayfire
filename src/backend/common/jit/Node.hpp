@@ -49,24 +49,46 @@ namespace common {
                         std::vector<const Node *> &full_nodes,
                         std::vector<Node_ids> &full_ids) const;
 
-        virtual void genKerName (std::stringstream &kerStream, const Node_ids& ids) const {
-            UNUSED(kerStream);
-            UNUSED(ids);
-        }
-        virtual void genParams  (std::stringstream &kerStream, int id, bool is_linear) const {
-            UNUSED(kerStream);
-            UNUSED(id);
-            UNUSED(is_linear);
-        }
-        virtual void genOffsets (std::stringstream &kerStream, int id, bool is_linear) const {
-            UNUSED(kerStream);
-            UNUSED(id);
-            UNUSED(is_linear);
-        }
-        virtual void genFuncs   (std::stringstream &kerStream, const Node_ids& ids) const {
-            UNUSED(kerStream);
-            UNUSED(ids);
-        }
+    /// Generates the string that will be used to hash the kernel
+    virtual void genKerName(std::stringstream &kerStream,
+                            const Node_ids &ids) const = 0;
+
+    /// Generates the function parameters for the node.
+    ///
+    /// \param[in/out] kerStream  The string will be written to this stream
+    /// \param[in]     ids        The integer id of the node and its children
+    /// \param[in]     is_linear  True if the kernel is a linear kernel
+    virtual void genParams(std::stringstream &kerStream, int id,
+                           bool is_linear) const {
+        UNUSED(kerStream);
+        UNUSED(id);
+        UNUSED(is_linear);
+    }
+
+    /// Generates the variable that stores the thread's/work-item's offset into
+    /// the memory.
+    ///
+    /// \param[in/out] kerStream  The string will be written to this stream
+    /// \param[in]     ids        The integer id of the node and its children
+    /// \param[in]     is_linear  True if the kernel is a linear kernel
+    virtual void genOffsets(std::stringstream &kerStream, int id,
+                            bool is_linear) const {
+        UNUSED(kerStream);
+        UNUSED(id);
+        UNUSED(is_linear);
+    }
+
+    /// Generates the code for the operation of the node.
+    ///
+    /// Generates the soruce code of the operation that the node needs to
+    /// perform. For example this function will create the string
+    /// "val2 = __add(val1, val2);" for the addition node.
+    ///
+    /// \param[in/out] kerStream  The string will be written to this stream
+    /// \param[in]     ids        The integer id of the node and its children
+    /// \param[in]     is_linear  True if the kernel is a linear kernel
+    virtual void genFuncs(std::stringstream &kerStream,
+                          const Node_ids &ids) const = 0;
 
         /// Calls the setArg function on each of the arguments passed into the kernel
         ///
@@ -83,32 +105,49 @@ namespace common {
             return start_id;
         }
 
-        virtual void getInfo(unsigned &len, unsigned &buf_count, unsigned &bytes) const {
-            UNUSED(buf_count);
-            UNUSED(bytes);
-            len++;
-        }
+    // Sets the index of the Param object stored in global memory. (CUDA ONLY)
+    virtual void setParamIndex(int index) { UNUSED(index); }
+    // Gets the index of the Param object stored in global memory. (CUDA ONLY)
+    virtual int getParamIndex() const { return -1; }
+
+    virtual void getInfo(unsigned &len, unsigned &buf_count,
+                         unsigned &bytes) const {
+        UNUSED(buf_count);
+        UNUSED(bytes);
+        len++;
+    }
 
         // Return the size of the parameter in bytes that will be passed to the
         // kernel
         virtual size_t getParamBytes() const { return 0; }
 
-        // Return the size of the size of the buffer node in bytes. Zero otherwise
-        virtual size_t getBytes() const { return 0; }
-        virtual bool isBuffer() const { return false; }
-        virtual bool isLinear(dim_t dims[4]) const {
-            UNUSED(dims);
-            return true;
-        }
-        std::string getTypeStr() const { return m_type_str; }
-        int getHeight()  const { return m_height; }
-        std::string getNameStr() const { return m_name_str; }
+    // Return the size of the size of the buffer node in bytes. Zero otherwise
+    virtual size_t getBytes() const { return 0; }
+
+    // Returns true if the node requires global memory access. This is true
+    // for buffer nodes and shift nodes. This implies that the Node needs
+    // access to the shape of the object to perform indexing operations
+    virtual bool requiresGlobalMemoryAccess() const { return false; }
+
+    // Returns true if this node is a Buffer
+    virtual bool isBuffer() const { return false; }
+    virtual bool isLinear(dim_t dims[4]) const {
+        UNUSED(dims);
+        return true;
+    }
+    std::string getTypeStr() const { return m_type_str; }
+    int getHeight() const { return m_height; }
+    std::string getNameStr() const { return m_name_str; }
 
         virtual ~Node() {}
     };
 
-    struct Node_ids {
-        std::array<int, Node::kMaxChildren> child_ids;
-        int id;
-    };
+static inline bool requiresGlobalMemoryAccess(Node &node) {
+    return node.requiresGlobalMemoryAccess();
 }
+
+struct Node_ids {
+    std::array<int, Node::kMaxChildren> child_ids;
+    int id;
+};
+}  // namespace common

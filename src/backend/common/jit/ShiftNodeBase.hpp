@@ -9,13 +9,16 @@
 
 #pragma once
 
+#include <common/jit/Node.hpp>
 #include <jit/BufferNode.hpp>
 #include <jit/kernel_generators.hpp>
 
-#include <iomanip>
+#include <Param.hpp>
 #include <backend.hpp>
 
 #include <array>
+#include <functional>
+#include <iomanip>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -46,11 +49,14 @@ namespace common {
             return false;
         }
 
-        void genKerName(std::stringstream &kerStream, const common::Node_ids& ids) const final
-        {
-            kerStream << "_" << m_name_str;
-            kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id << std::dec;
-        }
+    bool requiresGlobalMemoryAccess() const final { return true; }
+
+    void genKerName(std::stringstream &kerStream,
+                    const common::Node_ids &ids) const final {
+        kerStream << "_" << m_name_str;
+        kerStream << std::setw(3) << std::setfill('0') << std::dec << ids.id
+                  << std::dec;
+    }
 
         void genParams(std::stringstream &kerStream, int id, bool is_linear) const final
         {
@@ -70,9 +76,17 @@ namespace common {
             return curr_id + 4;
         }
 
-        void genOffsets(std::stringstream &kerStream, int id, bool is_linear) const final
-        {
-            detail::generateShiftNodeOffsets(kerStream, id, is_linear, m_type_str);
+        void setParamIndex(int index) final { m_buffer_node->setParamIndex(index); }
+        int getParamIndex() const final { return m_buffer_node->getParamIndex(); }
+
+        typename BufferNode::param_type getParam() {
+            return m_buffer_node->getParam();
+        }
+
+        void genOffsets(std::stringstream &kerStream, int id,
+                        bool is_linear) const final {
+            UNUSED(is_linear);
+            detail::generateShiftNodeOffsets(kerStream, id);
         }
 
         void genFuncs(std::stringstream &kerStream, const common::Node_ids& ids) const final

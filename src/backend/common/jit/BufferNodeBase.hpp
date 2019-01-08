@@ -8,9 +8,13 @@
  ********************************************************/
 
 #pragma once
+#include <backend.hpp>
+#include <common/jit/Node.hpp>
 #include <jit/kernel_generators.hpp>
 #include <backend.hpp>
 
+#include <iomanip>
+#include <mutex>
 #include <sstream>
 
 namespace common {
@@ -23,27 +27,27 @@ private:
     ParamType m_param;
     unsigned m_bytes;
     std::once_flag m_set_data_flag;
+    int param_index;
     bool m_linear_buffer;
 
-public:
-
-    BufferNodeBase(const char *type_str,
-                  const char *name_str)
-        : Node(type_str, name_str, 0, {})
-    {
-    }
+   public:
+    using param_type = ParamType;
+    BufferNodeBase(const char *type_str, const char *name_str)
+        : Node(type_str, name_str, 0, {}) {}
 
     bool isBuffer() const final { return true; }
 
+    bool requiresGlobalMemoryAccess() const final { return true; }
 
-    void setData(ParamType param, DataType data, const unsigned bytes, bool is_linear)
-    {
-        std::call_once(m_set_data_flag, [this, param, data, bytes, is_linear]() {
-                                          m_param = param;
-                                          m_data = data;
-                                          m_bytes = bytes;
-                                          m_linear_buffer = is_linear;
-                                        });
+    void setData(ParamType param, DataType data, const unsigned bytes,
+                 bool is_linear) {
+        std::call_once(m_set_data_flag,
+                       [this, param, data, bytes, is_linear]() {
+                           m_param         = param;
+                           m_data          = data;
+                           m_bytes         = bytes;
+                           m_linear_buffer = is_linear;
+                       });
     }
 
     bool isLinear(dim_t dims[4]) const final
@@ -68,13 +72,18 @@ public:
     }
 
     int setArgs(int start_id, bool is_linear,
-                std::function<void(int id, const void* ptr, size_t arg_size)> setArg) const override {
-        return detail::setKernelArguments(start_id, is_linear, setArg, m_data, m_param);
+                std::function<void(int id, const void *ptr, size_t arg_size)>
+                    setArg) const final {
+        return detail::setKernelArguments(start_id, is_linear, setArg, m_data,
+                                          m_param, param_index);
     }
 
-    void genOffsets(std::stringstream &kerStream, int id, bool is_linear) const final
-    {
-        detail::generateBufferOffsets(kerStream, id, is_linear, m_type_str);
+    void setParamIndex(int index) final { param_index = index; }
+    int getParamIndex() const final { return param_index; }
+
+    void genOffsets(std::stringstream &kerStream, int id,
+                    bool is_linear) const final {
+        detail::generateBufferOffsets(kerStream, id, is_linear);
     }
 
     void genFuncs(std::stringstream &kerStream, const common::Node_ids& ids) const final
@@ -89,6 +98,7 @@ public:
     }
 
     size_t getBytes() const final { return m_bytes; }
+    ParamType &getParam() { return m_param; }
 };
 
 }
