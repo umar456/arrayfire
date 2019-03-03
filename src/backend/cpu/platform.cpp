@@ -263,9 +263,9 @@ bool& evalFlag()
 
 DeviceManager::DeviceManager()
     : queues(MAX_QUEUES)
-    , memManager(new MemoryManager()),
-      fgMngr(new graphics::ForgeManager()){}
-
+    , memManager(new MemoryManager())
+    , fgMngr(new graphics::ForgeManager())
+    {}
 
 MemoryManager& memoryManager()
 {
