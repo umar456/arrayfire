@@ -8,8 +8,13 @@
  ********************************************************/
 
 #pragma once
-#include <af/defines.h>
+
 #include <backend.hpp>
+#include <types.hpp>
+
+#ifndef __CUDACC_RTC__
+#include <af/defines.h>
+#endif
 
 namespace cuda
 {
@@ -34,7 +39,9 @@ public:
             strides[i] = istrides[i];
         }
     }
-    size_t elements() const noexcept { return dims[0] * dims[1] * dims[2] * dims[3]; }
+    __DH__ size_t elements() const noexcept {
+        return dims[0] * dims[1] * dims[2] * dims[3];
+    }
 };
 
 template<typename T>
@@ -71,7 +78,9 @@ public:
         }
     }
 
-    __DH__ ~CParam() {}
+    __DH__ size_t elements() const noexcept {
+        return dims[0] * dims[1] * dims[2] * dims[3];
+    }
 };
 
 }
