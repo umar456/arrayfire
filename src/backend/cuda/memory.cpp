@@ -138,23 +138,22 @@ bool checkMemoryLimit()
 
 #define INSTANTIATE(T)                                 \
     template uptr<T> memAlloc(const size_t &elements); \
-    template void memFree(T* ptr);                     \
-    template T* pinnedAlloc(const size_t &elements);   \
-    template void pinnedFree(T* ptr);
+    template void memFree(T *ptr);                     \
+    template T *pinnedAlloc(const size_t &elements);   \
+    template void pinnedFree(T *ptr);
 
-    INSTANTIATE(float)
-    INSTANTIATE(cfloat)
-    INSTANTIATE(double)
-    INSTANTIATE(cdouble)
-    INSTANTIATE(int)
-    INSTANTIATE(uint)
-    INSTANTIATE(char)
-    INSTANTIATE(uchar)
-    INSTANTIATE(intl)
-    INSTANTIATE(uintl)
-    INSTANTIATE(short)
-    INSTANTIATE(ushort)
-    INSTANTIATE(void *)
+INSTANTIATE(float)
+INSTANTIATE(cfloat)
+INSTANTIATE(double)
+INSTANTIATE(cdouble)
+INSTANTIATE(int)
+INSTANTIATE(uint)
+INSTANTIATE(char)
+INSTANTIATE(uchar)
+INSTANTIATE(intl)
+INSTANTIATE(uintl)
+INSTANTIATE(short)
+INSTANTIATE(ushort)
 
 MemoryManager::MemoryManager()
     : common::MemoryManager<cuda::MemoryManager>(getDeviceCount(), common::MAX_BUFFERS,
