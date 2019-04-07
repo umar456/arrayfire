@@ -200,25 +200,21 @@ namespace cuda
     }
 
     template<typename T>
-    Array<T> createNodeArray(const dim4 &dims, Node_ptr node)
-    {
-        Array<T> out =  Array<T>(dims, node);
+    Array<T> createNodeArray(const dim4 &dims, Node_ptr node) {
+        Array<T> out = Array<T>(dims, node);
 
         if (evalFlag()) {
-
             if (node->getHeight() >= (int)getMaxJitSize()) {
                 out.eval();
             } else {
-
                 size_t alloc_bytes, alloc_buffers;
                 size_t lock_bytes, lock_buffers;
 
-                deviceMemoryInfo(&alloc_bytes, &alloc_buffers,
-                                 &lock_bytes, &lock_buffers);
+                deviceMemoryInfo(&alloc_bytes, &alloc_buffers, &lock_bytes,
+                        &lock_buffers);
 
                 bool isBufferLimit =
-                    lock_bytes > getMaxBytes() ||
-                    lock_buffers > getMaxBuffers();
+                    lock_bytes > getMaxBytes() || lock_buffers > getMaxBuffers();
 
                 // We eval in the following cases.
                 //
@@ -234,52 +230,49 @@ namespace cuda
                 // TODO: Find better solution than the following emperical solution.
                 if (node->getHeight() > 25 || isBufferLimit) {
                     // This is the size of the params that are passed by default
-                    constexpr int param_base_size = sizeof(Param<T>) + (4 * sizeof(uint));
+                    constexpr size_t param_base_size =
+                        sizeof(Param<T>) + (4 * sizeof(uint));
 
-                    // This is the maximum size of the params that can be allowed by CUDA
-                    // NOTE: This number should have been (4096 - some_buffer_size) BUT
-                    // kernels who's kernel sizes come close to this value are not passing
-                    // and cuModuleLoadDataEx is failing with CUDA_ERROR_INVALID_IMAGE(200).
-                    // 35*sizeof(int) seems to be the magic number that passes all tests.
-                    // I have no idea why this is the case.
-                    constexpr int max_param_size = (4096 - (sizeof(Param<T>) + 35*sizeof(uint)));
+                    // This is the maximum size of the params that can be allowed by
+                    // CUDA NOTE: This number should have been (4096 -
+                    // some_buffer_size) BUT kernels who's kernel sizes come close
+                    // to this value are not passing and cuModuleLoadDataEx is
+                    // failing with CUDA_ERROR_INVALID_IMAGE(200). 35*sizeof(int)
+                    // seems to be the magic number that passes all tests.
+                    constexpr size_t max_param_size =
+                        (4096 - (sizeof(Param<T>) + 35 * sizeof(uint)));
                     Node *n = node.get();
 
-                    struct  tree_info {
-                        size_t buffer_size;
-                        int num_buffers;
-                        int param_scalar_size;
-                        bool is_linear;
+                    struct tree_info {
+                        size_t total_buffer_size;
+                        size_t num_buffers;
+                        size_t param_scalar_size;
                     };
                     NodeIterator<> end_node;
-                    dim4 outdim = out.dims();
-                    tree_info info = accumulate(NodeIterator<>(n), end_node,
-                                                tree_info{0, 0, 0, true},
-                                                [=](tree_info& prev, const Node& node) {
-                                                    if(node.isBuffer()) {
-                                                        const auto& buf_node = static_cast<const BufferNode<T>&>(node);
-                                                        prev.buffer_size += buf_node.getBytes();
-                                                        prev.num_buffers++;
-                                                        prev.is_linear &= buf_node.isLinear((dim_t*)outdim.get());
-                                                    } else {
-                                                        prev.param_scalar_size += node.getParamBytes();
-                                                    }
-                                                    // getBytes returns the size of the data Array. Sub arrays will
-                                                    // be represented by their parent size.
-                                                    return prev;
-                                                });
-                    int param_size = param_base_size + info.param_scalar_size;
-                    if(info.is_linear) {
-                        param_size += info.num_buffers * sizeof(T*);
-                    } else {
-                        param_size += info.num_buffers * sizeof(Param<T>);
-                    }
+                    tree_info info = accumulate(
+                            NodeIterator<>(n), end_node, tree_info{0, 0, 0},
+                            [=](tree_info &prev, const Node &node) {
+                            if (node.isBuffer()) {
+                            const auto &buf_node =
+                            static_cast<const BufferNode<T> &>(node);
+                            prev.total_buffer_size += buf_node.getBytes();
+                            prev.num_buffers++;
+                            } else {
+                            prev.param_scalar_size += node.getParamBytes();
+                            }
+                            // getBytes returns the size of the data Array. Sub
+                            // arrays will be represented by their parent size.
+                            return prev;
+                            });
+                    size_t param_size = param_base_size + info.param_scalar_size;
+                    param_size += info.num_buffers * sizeof(Param<T>);
 
-
-                    // TODO: the buffer_size check here is very conservative. It will trigger
-                    // an evaluation of the node in most cases. We should be checking the
-                    // amount of memory available to guard this eval
-                    if (param_size >= max_param_size  || info.buffer_size * 2 > lock_bytes) {
+                    // TODO: the buffer_size check here is very conservative. It
+                    // will trigger an evaluation of the node in most cases. We
+                    // should be checking the amount of memory available to guard
+                    // this eval
+                    if (param_size >= max_param_size ||
+                            info.total_buffer_size * 2 > lock_bytes) {
                         out.eval();
                     }
                 }

@@ -142,11 +142,10 @@ void sparseTransposeTester(const int m, const int n, const int k, int factor, do
     ASSERT_NEAR(0, calc_norm(imag(dRes3), imag(sRes3)), eps);
 }
 
-template<typename T> static
-void convertCSR(const int M, const int N, const float ratio, int targetDevice=-1)
-{
-    if (targetDevice>=0)
-        af::setDevice(targetDevice);
+template<typename T>
+static void convertCSR(const int M, const int N, const double ratio,
+                       int targetDevice = -1) {
+    if (targetDevice >= 0) af::setDevice(targetDevice);
 
     if (noDoubleTests<T>()) return;
 #if 1
