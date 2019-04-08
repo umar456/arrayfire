@@ -14,7 +14,7 @@
 #include <backend.hpp>
 #include <common/ArrayInfo.hpp>
 #include <tile.hpp>
-#include <arith.hpp>
+#include <unary.hpp>
 
 using af::dim4;
 using namespace detail;
@@ -39,10 +39,7 @@ static inline af_array tile(const af_array in, const af::dim4 &tileDims)
     }
 
     if (take_jit_path) {
-        // FIXME: This Should ideally call a NOP function, but adding 0 should be OK
-        // This does not allocate any memory, just a JIT node
-        Array<T> tmpArray = createValueArray<T>(outDims, scalar<T>(0));
-        return getHandle(arithOp<T, af_add_t>(inArray, tmpArray, outDims));
+        return getHandle(unaryOp<T, af_noop_t>(inArray, outDims));
     } else {
         return getHandle(tile<T>(inArray, tileDims));
     }

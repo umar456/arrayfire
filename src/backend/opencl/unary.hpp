@@ -69,12 +69,12 @@ UNARY_FN(floor)
 UNARY_FN(isinf)
 UNARY_FN(isnan)
 UNARY_FN(iszero)
+UNARY_DECL(noop, "__noop")
 
 #undef UNARY_FN
 
 template<typename T, af_op_t op>
-Array<T> unaryOp(const Array<T> &in)
-{
+Array<T> unaryOp(const Array<T> &in, dim4 outDim = dim4(-1, -1, -1, -1)) {
     common::Node_ptr in_node = in.getNode();
 
     common::UnaryNode *node = new common::UnaryNode(dtype_traits<T>::getName(),
@@ -82,12 +82,12 @@ Array<T> unaryOp(const Array<T> &in)
                                                     unaryName<op>(),
                                                     in_node, op);
 
-    return createNodeArray<T>(in.dims(), common::Node_ptr(node));
+    if (outDim == dim4(-1, -1, -1, -1)) { outDim = in.dims(); }
+    return createNodeArray<T>(outDim, common::Node_ptr(node));
 }
 
 template<typename T, af_op_t op>
-Array<char> checkOp(const Array<T> &in)
-{
+Array<char> checkOp(const Array<T> &in, dim4 outDim = dim4(-1, -1, -1, -1)) {
     common::Node_ptr in_node = in.getNode();
 
     common::UnaryNode *node = new common::UnaryNode(dtype_traits<char>::getName(),
@@ -95,7 +95,8 @@ Array<char> checkOp(const Array<T> &in)
                                                     unaryName<op>(),
                                                     in_node, op);
 
-    return createNodeArray<char>(in.dims(), common::Node_ptr(node));
+    if (outDim == dim4(-1, -1, -1, -1)) { outDim = in.dims(); }
+    return createNodeArray<char>(outDim, common::Node_ptr(node));
 }
 
 }
