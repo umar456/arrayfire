@@ -561,13 +561,17 @@ namespace af
 
 #if __cplusplus > 199711L
     af::array::array_proxy::array_proxy(array_proxy &&other) {
-        impl = other.impl;
+       impl = other.impl;
+       other.impl = nullptr;
     }
 
-    array::array_proxy&
-    af::array::array_proxy::operator=(array_proxy &&other) {
-        array out = other;
-        return *this = out;
+    array::array_proxy &af::array::array_proxy::operator=(array_proxy &&other) {
+        if (&other == this)
+            return *this;
+        delete this->impl;
+        impl = other.impl;
+        other.impl = nullptr;
+        return *this;
     }
 #endif
 
