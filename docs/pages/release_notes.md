@@ -1,6 +1,94 @@
 Release Notes {#releasenotes}
 ==============
 
+v3.6.3
+======
+
+Features
+--------
+- Not having graphics libraries is no longer a blocker to run
+  arrayfire application code since graphics dependencies are
+  loaded at runtime \PR{2365}
+- Graphics upstream, forge, has been bumped up to v1.0.4 \PR{2466}
+- Intel MKL's batched GEMM operation will be used wherever
+  applicable in CPU backend \PR{2206}
+
+Improvements
+------------
+- Added environment variable to save generated kernels src to disk \PR{#2404}
+- Added CUDA runtime compilation support using nvrtc \PR{#2437}
+- Added assertions to check if nvidia drivers are recent enough for cuda
+  backend \PR{2421}
+- Changed forge resource managemenet to use smart pointers \PR{2452}
+- Improved CUDA version checking code \PR{2448}
+- Enabled graphics by default for all builds starting with v3.6.3 \PR{2365}
+- Fixed several warnings \PR{2344} \PR{2356} \PR{2361}
+- Refactored initArray() calls to use createEmptyArray(). initArray() is for
+  internal use only by Array class. \PR{2361}
+- Refactored `void*` memory allocations to use unsigned char type \PR{2459}
+- `void*` pointers are now allowed as arguments
+  to `af::array::write()` \PR{2367}
+- Replaced deprecated MKL API with in-house implementations for sparse
+  to sparse/dense conversions \PR{2312}
+- Removed the use of addition and scalars in tile jit nodes \PR{#2472}
+- Reorganized and fixed some internal backend API \PR{2356}
+
+Bug Fixes
+---------
+- Fixed af::array::array\_proxy move assignment operator \PR{#2479}
+- Fixed input array dimensions validation in svdInplace() \PR{2331}
+- Fixed the typedef declaration for window resource handle \PR{2357}. This
+  change doesn't cause any ABI/API change.
+- Deprecated intl and uintl typedefs in API \PR{2360}
+- Fixed some leftover cudaMemcopy calls that were enqueuing the copy
+  operation to default stream \PR{2362}
+- Fixed enum declaration order in cpu sparse blas implementation, the order
+  of declaration seems to be problem with GCC 8 series \PR{2379}
+- Fixed `af::write` tests \PR{2380}
+- Fixed a bug in broadcast step of 1D exclusive scan \PR{2366}
+- Fixed OpenGL related build errors on OSX \PR{2382}
+- Fixed multiple array evaluation \PR{2384}
+- Fixed buffer overflow and expected output of kNN SSD small test \PR{2445}
+- Fixed MKL linking order to enable threaded BLAS \PR{2444}
+- Fixed const correctness of `af_device_array` API \PR{2396}
+- Updated error tolerance in batched matmul tests. Batched GEMM on cuBLAS
+  isn't always producing identical results on 6.x compute devices \PR{2368}
+- Added validations for forge module plugin availability before calling
+  resource cleanup \PR{2443}
+- Added an alternative code-path for `std::make_shared` usage
+  on MSVC toolchain(_MSC_VER > 1914) in CUDA backend \PR{2443}
+- Fixed cpu random number generation to be consistent with
+  other backends \PR{2435}
+- Fixed BLAS gemm func generators for newest MSVC 19 on VS 2017 \PR{2464}
+- Added Apple platform to jit parameter size check \PR{2476}
+- Handled very large JIT tree generations \PR{2484}
+
+Documentation
+-------------
+- Updated svdInplace() documentation following a bugfix \PR{2331}
+- Fixed a typo in matrix multiplication documentation \PR{2358}
+- Fixed a code snippet demostrating C-API use \PR{2406}
+- Updated hamming matcher documentaion about an
+  implementation limitation \PR{2434}
+- Added illustration to demonstrate tradeoffs involved in
+  using rotate function \PR{2453}
+
+Misc
+----
+- Updated compilation order of cuda files to speed up compile time \PR{2368}
+- Removed conditional graphics support builds after enabling runtime
+  loading of graphics dependencies \PR{2365}
+- Marked graphics dependencies as optional in CPack RPM config \PR{2365}
+- Refactored a sparse arithmetic backend API \PR{2379}
+- Manage forge(graphics upstream) resources from DeviceManager class
+  of respective backends \PR{2381}
+- Fixed non-mkl & non-batch blas upstream call arguments \PR{2401}
+
+Contributions
+-------------
+Special thanks to our contributors: [Alessandro Bessi](https://github.com/alessandrobessi),
+[zhihaoy](https://github.com/zhihaoy)
+
 v3.6.2
 ======
 
