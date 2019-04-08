@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace spdlog {
@@ -73,6 +74,8 @@ bool synchronize_calls();
 
 cudaDeviceProp getDeviceProp(int device);
 
+std::pair<int, int> getComputeCapability(const int device);
+
 struct cudaDevice_t {
     cudaDeviceProp prop;
     size_t flops;
@@ -101,10 +104,9 @@ SparseHandle sparseHandle();
 //
 ///////////////////////// END Sub-Managers /////////////////////
 
-class DeviceManager
-{
-    public:
-        static const unsigned MAX_DEVICES = 16;
+class DeviceManager {
+   public:
+        static const size_t MAX_DEVICES = 16;
 
         static bool checkGraphicsInteropCapability();
 
@@ -142,8 +144,10 @@ class DeviceManager
 
         friend cudaDeviceProp getDeviceProp(int device);
 
-    private:
-        DeviceManager();
+        friend std::pair<int, int> getComputeCapability(const int device);
+
+   private:
+    DeviceManager();
 
         // Following two declarations are required to
         // avoid copying accidental copy/assignment
@@ -163,6 +167,7 @@ class DeviceManager
         std::shared_ptr<spdlog::logger> logger;
 
         std::vector<cudaDevice_t> cuDevices;
+        std::vector<std::pair<int, int>> devJitComputes;
 
         int nDevices;
         cudaStream_t streams[MAX_DEVICES];
