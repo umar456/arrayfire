@@ -46,14 +46,8 @@ inline int setKernelArguments(
     return start_id + 2;
 }
 
-/// Generates the code to calculate the offsets for a buffer
-inline void generateBufferOffsets(std::stringstream& kerStream, int id, bool is_linear) {
-    std::string idx_str  = std::string("int idx") + std::to_string(id);
-    std::string info_str = std::string("iInfo") + std::to_string(id);
-
   /// Generates the code to calculate the offsets for a buffer
-  void generateBufferOffsets(std::stringstream &kerStream, int id, bool is_linear, const std::string& type_str) {
-      UNUSED(type_str);
+  void generateBufferOffsets(std::stringstream &kerStream, int id, bool is_linear) {
       std::string idx_str = std::string("int idx") + std::to_string(id);
       std::string info_str = std::string("iInfo") + std::to_string(id);
 
@@ -68,18 +62,14 @@ inline void generateBufferOffsets(std::stringstream& kerStream, int id, bool is_
       }
   }
 
+
+  /// Generates the code to read a buffer and store it in a local variable
+  inline void generateBufferRead(std::stringstream& kerStream, int id,
+                                 const std::string& type_str) {
+      kerStream << type_str << " val" << id << " = in" << id << "[idx" << id << "];\n";
+  }
+
 inline void generateShiftNodeOffsets(std::stringstream& kerStream, int id) {
-    std::string idx_str   = std::string("idx") + std::to_string(id);
-    std::string info_str  = std::string("iInfo") + std::to_string(id);
-    std::string id_str    = std::string("sh_id_") + std::to_string(id) + "_";
-    std::string shift_str = std::string("shift") + std::to_string(id) + "_";
-
-
-  inline
-  void generateShiftNodeOffsets(std::stringstream &kerStream, int id,
-                                bool is_linear, const std::string& type_str) {
-      UNUSED(is_linear);
-      UNUSED(type_str);
       std::string idx_str = std::string("idx") + std::to_string(id);
       std::string info_str = std::string("iInfo") + std::to_string(id);
       std::string id_str = std::string("sh_id_") + std::to_string(id) + "_";

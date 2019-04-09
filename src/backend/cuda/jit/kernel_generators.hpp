@@ -71,6 +71,7 @@ inline void generateBufferOffsets(std::stringstream& kerStream, int id,
     }
 }
 
+
 /// Generates the code to read a buffer and store it in a local variable
 inline void generateBufferRead(std::stringstream& kerStream, int id,
                                const std::string& type_str) {

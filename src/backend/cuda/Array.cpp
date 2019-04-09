@@ -273,9 +273,10 @@ Array<T> createNodeArray(const dim4 &dims, Node_ptr node) {
                 }
             }
         }
-
-        return out;
     }
+
+    return out;
+}
 
     template<typename T>
     Array<T> createHostDataArray(const dim4 &size, const T * const data)
