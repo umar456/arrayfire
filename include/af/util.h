@@ -287,6 +287,10 @@ extern "C" {
     AFAPI af_err af_set_enable_stacktrace(int is_enabled);
 #endif
 
+#if AF_API_VERSION >= 37
+  AFAPI af_err af_print_jit_tree(af_array arr);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

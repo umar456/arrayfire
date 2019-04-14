@@ -17,6 +17,9 @@ target_sources(afcommon_interface
     ${CMAKE_CURRENT_SOURCE_DIR}/jit/Node.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jit/NodeIO.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jit/NodeIterator.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/jit/NodePrinter.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/jit/NodeVisitor.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/jit/NodeVisitor.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jit/ScalarNode.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jit/UnaryNode.hpp
     )

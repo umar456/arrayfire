@@ -15,6 +15,7 @@
 #include <af/defines.h>
 
 #include <nonstd/span.hpp>
+
 #include <algorithm>
 #include <array>
 #include <functional>
@@ -73,6 +74,7 @@ namespace arrayfire {
 namespace common {
 class Node;
 struct Node_ids;
+class INodeVisitor;
 
 /// A equal_to class that calls the dereference nodes equality operator
 struct NodePtr_equalto {
@@ -176,6 +178,10 @@ class Node {
     /// Generates the string that will be used to hash the kernel
     virtual void genKerName(std::string &kerString,
                             const Node_ids &ids) const = 0;
+
+    const std::array<Node_ptr, kMaxChildren> &getChildren() const noexcept {
+        return m_children;
+    }
 
     /// Generates the function parameters for the node.
     ///
@@ -287,6 +293,8 @@ class Node {
     /// \note For the shift node this is "Sh" appended by the short name of the
     ///       type
     virtual std::string getNameStr() const { return getShortName(m_type); }
+
+    void visit(INodeVisitor &v);
 
     /// Default destructor
     virtual ~Node() noexcept = default;
