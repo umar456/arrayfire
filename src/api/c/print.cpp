@@ -18,9 +18,11 @@
 #include <sparse_handle.hpp>
 #include <type_util.hpp>
 
+#include <common/jit/NodePrinter.hpp>  // TODO: Find a better name
 #include <af/array.h>
 #include <af/data.h>
 #include <af/internal.h>
+#include <af/util.h>
 
 #include <iomanip>
 #include <iostream>
@@ -29,6 +31,8 @@
 #include <vector>
 
 #include <af/index.h>
+#include <ctime>
+#include <cstdlib>
 
 using common::half;
 using detail::cdouble;
@@ -285,5 +289,14 @@ af_err af_array_to_string(char **output, const char *exp, const af_array arr,
         (*output)[str.size()] = '\0';  // don't forget the terminating 0
     }
     CATCHALL;
+    return AF_SUCCESS;
+}
+
+af_err af_print_jit_tree(af_array arr) {
+    const ArrayInfo &info = getInfo(arr, false);  // Don't assert sparse/dense
+    af_dtype type         = info.getType();
+    switch (type) {
+        case f32: common::printNodes(getArray<float>(arr).getNode().get());
+    }
     return AF_SUCCESS;
 }

@@ -87,6 +87,9 @@ class NaryNode : public Node {
         }
         kerStream << ");\n";
     }
+
+    int getOp() const { return m_op; }
+    int getNumChildren() { return m_num_children; }
 };
 
 template<typename Ti, int N, typename FUNC>

@@ -15,12 +15,13 @@
 #include <types.hpp>
 #include <af/defines.h>
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 enum class kJITHeuristics {
@@ -33,6 +34,7 @@ enum class kJITHeuristics {
 namespace common {
 class Node;
 struct Node_ids;
+class INodeVisitor;
 
 using Node_ptr      = std::shared_ptr<Node>;
 using Node_map_t    = std::unordered_map<Node *, int>;
@@ -124,6 +126,10 @@ class Node {
     /// Generates the string that will be used to hash the kernel
     virtual void genKerName(std::string &kerString,
                             const Node_ids &ids) const = 0;
+
+    const std::array<Node_ptr, kMaxChildren> &getChildren() const noexcept {
+        return m_children;
+    }
 
     /// Generates the function parameters for the node.
     ///
@@ -225,6 +231,8 @@ class Node {
     /// \note For the shift node this is "Sh" appended by the short name of the
     ///       type
     virtual std::string getNameStr() const { return getShortName(m_type); }
+
+    void visit(INodeVisitor &v);
 
     /// Default destructor
     virtual ~Node() noexcept = default;

@@ -19,6 +19,12 @@
 
 #include <numeric>
 #include <tuple>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 
 using af::array;
 using af::constant;
@@ -828,3 +834,14 @@ TEST(JIT, setKernelCacheDirectory) {
   // Reset to the old path
   ASSERT_SUCCESS(af_set_kernel_cache_directory(old_path.c_str(), false));
 }
+
+TEST(JIT, PrintNodes) {
+    array a = randu(10, 10);
+
+    for (int i = 0; i < 6; i++) { a += sin(randu(10, 10) * 10.0f); }
+    a = tile(a, 1, 1, 5);
+    af_print_jit_tree(a.get());
+    a.eval();
+    af::sync();
+}
+

@@ -14,7 +14,9 @@
 
 #include <math.hpp>
 #include <types.hpp>
-#include <iomanip>
+#include <string>
+#include <sstream>
+#include <algorithm>
 
 namespace common {
 
