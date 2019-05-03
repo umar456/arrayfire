@@ -21,7 +21,10 @@
 #include <spdlog/spdlog.h>
 #include <types.hpp>
 
+#include <execinfo.h>
+
 #include <mutex>
+#include <map>
 
 template class common::MemoryManager<cuda::MemoryManager>;
 template class common::MemoryManager<cuda::MemoryManagerPinned>;
@@ -58,11 +61,52 @@ void printMemInfo(const char *msg, const int device) {
     memoryManager().printInfo(msg, device);
 }
 
+  static const int BT_BUF_SIZE = 100;
+
+
+  std::map<void*, std::tuple<string, size_t>> alloc_backtraces;
+
+  template<typename... ARGS>
+  std::string
+  bt(std::string fmt, ARGS... args)
+  {
+    int j, nptrs;
+    void *buffer[BT_BUF_SIZE];
+    char **strings;
+
+    nptrs = backtrace(buffer, BT_BUF_SIZE);
+    auto l = spdlog::get("mem");
+    l->trace(fmt.c_str(), args...);
+
+    /* The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
+       would produce similar output to the following: */
+
+    strings = backtrace_symbols(buffer, nptrs);
+    if (strings == NULL) {
+      perror("backtrace_symbols");
+      exit(EXIT_FAILURE);
+    }
+
+    string backtrace_string;
+    for (j = 1; j < nptrs; j++) {
+      backtrace_string += strings[j];
+      backtrace_string += "\n";
+    }
+
+    free(strings);
+    return backtrace_string;
+  }
+
 template<typename T>
 uptr<T> memAlloc(const size_t &elements) {
     size_t size = elements * sizeof(T);
-    return uptr<T>(static_cast<T *>(memoryManager().alloc(size, false)),
+    auto out = uptr<T>(static_cast<T *>(memoryManager().alloc(size, false)),
                    memFree<T>);
+
+    string bt_str = bt("memAlloc: {} {}", (void*)out.get(), size);
+    alloc_backtraces[out.get()] = make_tuple(bt_str, size);
+    puts(bt_str.c_str());
+    return out;
 }
 
 void *memAllocUser(const size_t &bytes) {
@@ -70,6 +114,9 @@ void *memAllocUser(const size_t &bytes) {
 }
 template<typename T>
 void memFree(T *ptr) {
+    puts(bt("memFree: {}", (void*)ptr).c_str());
+    alloc_backtraces.erase((void*)ptr);
+
     memoryManager().unlock((void *)ptr, false);
 }
 
@@ -187,3 +234,19 @@ void MemoryManagerPinned::nativeFree(void *ptr) {
     if (err != cudaErrorCudartUnloading) { CUDA_CHECK(err); }
 }
 }  // namespace cuda
+
+
+AFAPI void clear_ptr_bt() {
+  cuda::alloc_backtraces.clear();
+}
+
+AFAPI void print_ptr_bt() {
+  using std::get;
+  puts("PRINTING ALLOCATIONS ==============================================");
+  for(auto a : cuda::alloc_backtraces) {
+      printf("%p %zu:\n%s\n", a.first, get<1>(a.second), get<0>(a.second).c_str());
+  }
+  puts("DONE PRINTING ALLOCATIONS ==============================================");
+}
+
+

@@ -114,12 +114,16 @@ TEST(JIT, CPP_JIT_Reset_Unary) {
     for (int i = 0; i < (int)f.elements(); i++) { ASSERT_EQ(hf[i], -hg[i]); }
 }
 
+void clear_ptr_bt();
+void print_ptr_bt();
+
 TEST(JIT, CPP_Multi_linear) {
     const int num = 1 << 16;
     array a       = randu(num, s32);
     array b       = randu(num, s32);
     array x       = a + b;
     array y       = a - b;
+    //clear_ptr_bt();
     eval(x, y);
 
     vector<int> ha(num);
@@ -137,6 +141,7 @@ TEST(JIT, CPP_Multi_linear) {
 
     ASSERT_VEC_ARRAY_EQ(goldx, dim4(num), x);
     ASSERT_VEC_ARRAY_EQ(goldy, dim4(num), y);
+    print_ptr_bt();
 }
 
 TEST(JIT, CPP_strided) {

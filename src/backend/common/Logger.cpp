@@ -44,6 +44,9 @@ shared_ptr<logger> loggerFactory(string name) {
             env_var.find(name) != string::npos) {
             logger->set_level(trace);
         }
+        try {
+          spdlog::register_logger(logger);
+        } catch(...) {}
     }
     return logger;
 }
