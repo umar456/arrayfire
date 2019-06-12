@@ -130,11 +130,6 @@ STATIC_ double minval() {
     return -std::numeric_limits<double>::infinity();
 }
 
-static inline double real(cdouble in) { return in.s[0]; }
-static inline float real(cfloat in) { return in.s[0]; }
-static inline double imag(cdouble in) { return in.s[1]; }
-static inline float imag(cfloat in) { return in.s[1]; }
-
 bool operator==(cfloat a, cfloat b);
 bool operator!=(cfloat a, cfloat b);
 bool operator==(cdouble a, cdouble b);

@@ -20,6 +20,7 @@
 #include <af/traits.hpp>
 
 #include <cmath>
+#include <ostream>
 #include <sstream>
 #include <string>
 
@@ -148,6 +149,35 @@ const char *getFullName() {
     return af::dtype_traits<T>::getName();
 }
 
+float real(cfloat val) { return val.s[0]; }
+double real(cdouble val) { return val.s[0]; }
+float imag(cfloat val) { return val.s[1]; }
+double imag(cdouble val) { return val.s[1]; }
+
+std::ostream &operator<<(std::ostream &os, cdouble val) {
+    // complex values seem to handle setw correctly
+    std::complex<double> out(real(val), imag(val));
+    os << out;
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, cfloat val) {
+    // complex values seem to handle setw correctly
+    std::complex<float> out(real(val), imag(val));
+    os << out;
+    return os;
+}
 }  // namespace
 
+
+bool operator==(cfloat a, cfloat b);
+bool operator!=(cfloat a, cfloat b);
+bool operator==(cdouble a, cdouble b);
+bool operator!=(cdouble a, cdouble b);
+cfloat operator+(cfloat a, cfloat b);
+cfloat operator+(cfloat a);
+cdouble operator+(cdouble a, cdouble b);
+cdouble operator+(cdouble a);
+cfloat operator*(cfloat a, cfloat b);
+cdouble operator*(cdouble a, cdouble b);
 }  // namespace opencl

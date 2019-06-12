@@ -22,6 +22,8 @@ using dim_t = long long;
 namespace cuda {
 #endif  //__CUDACC_RTC__
 
+
+
 using cdouble = cuDoubleComplex;
 using cfloat  = cuFloatComplex;
 using intl    = long long;
@@ -107,6 +109,20 @@ SPECIALIZE(int)
 SPECIALIZE(unsigned int)
 SPECIALIZE(unsigned long long)
 SPECIALIZE(long long)
+
+std::ostream &operator<<(std::ostream &os, cdouble val) {
+    // complex values seem to handle setw correctly
+    std::complex<double> out(val.x, val.y);
+    os << out;
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os, cfloat val) {
+    // complex values seem to handle setw correctly
+    std::complex<float> out(val.x, val.y);
+    os << out;
+    return os;
+}
 
 #undef SPECIALIZE
 }  // namespace

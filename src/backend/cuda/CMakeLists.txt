@@ -376,6 +376,7 @@ cuda_add_library(afcuda
     lookup.hpp
     lu.hpp
     match_template.hpp
+    math.cu
     math.hpp
     mean.hpp
     meanshift.hpp
@@ -392,7 +393,6 @@ cuda_add_library(afcuda
     platform.hpp
     plot.cpp
     plot.hpp
-    print.hpp
     qr.hpp
     random_engine.hpp
     range.hpp

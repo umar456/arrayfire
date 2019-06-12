@@ -29,6 +29,14 @@ cdouble operator+(cdouble a, cdouble b) {
     return res;
 }
 
+cfloat operator+(cfloat a) {
+    return a;
+}
+
+cdouble operator+(cdouble a) {
+    return a;
+}
+
 cfloat operator*(cfloat lhs, cfloat rhs) {
     cfloat out;
     out.s[0] = lhs.s[0] * rhs.s[0] - lhs.s[1] * rhs.s[1];

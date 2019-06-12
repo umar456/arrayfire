@@ -337,6 +337,9 @@ __SDH__ bool operator==(cdouble a, cdouble b) {
 }
 __SDH__ bool operator!=(cdouble a, cdouble b) { return !(a == b); }
 
+__DH__ cfloat operator+(cfloat a);
+__DH__ cdouble operator+(cdouble a);
+
 template<typename T>
 static inline T division(T lhs, double rhs) {
     return lhs / rhs;

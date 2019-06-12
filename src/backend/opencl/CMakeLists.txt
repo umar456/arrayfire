@@ -169,7 +169,6 @@ target_sources(afopencl
     platform.hpp
     plot.cpp
     plot.hpp
-    print.hpp
     product.cpp
     program.cpp
     program.hpp
