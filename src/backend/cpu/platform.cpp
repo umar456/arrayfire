@@ -120,8 +120,14 @@ unsigned getMaxJitSize() {
 
 int getDeviceCount() { return DeviceManager::NUM_DEVICES; }
 
+int& tlocalActiveDeviceId() {
+    thread_local int activeDeviceId = 0;
+
+    return activeDeviceId;
+}
+
 // Get the currently active device id
-int getActiveDeviceId() { return DeviceManager::ACTIVE_DEVICE_ID; }
+int getActiveDeviceId() { return tlocalActiveDeviceId(); }
 
 size_t getDeviceMemorySize(int device) {
     UNUSED(device);
@@ -131,16 +137,10 @@ size_t getDeviceMemorySize(int device) {
 size_t getHostMemorySize() { return common::getHostMemorySize(); }
 
 int setDevice(int device) {
-    thread_local bool flag = false;
-    if (!flag && device != 0) {
-#ifndef NDEBUG
-        fprintf(
-            stderr,
-            "WARNING af_set_device(device): device can only be 0 for CPU\n");
-#endif
-        flag = true;
-    }
-    return 0;
+    int old = getActiveDeviceId();
+
+    tlocalActiveDeviceId() = device;
+    return old;
 }
 
 queue& getQueue(int device) {

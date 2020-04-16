@@ -48,7 +48,7 @@ size_t getHostMemorySize();
 
 int setDevice(int device);
 
-queue& getQueue(int device = 0);
+queue& getQueue(int device = getActiveDeviceId());
 
 void sync(int device);
 

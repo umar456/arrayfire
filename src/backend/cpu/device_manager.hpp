@@ -91,7 +91,7 @@ namespace cpu {
 class DeviceManager {
    public:
     static const int MAX_QUEUES           = 1;
-    static const int NUM_DEVICES          = 1;
+    static const int NUM_DEVICES          = 8;
     static const int ACTIVE_DEVICE_ID     = 0;
     static const bool IS_DOUBLE_SUPPORTED = true;
 
