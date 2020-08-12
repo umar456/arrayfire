@@ -21,13 +21,18 @@ namespace af
     /// \param[in] lhs first input
     /// \param[in] rhs second input
     /// \return minimum of \p lhs and \p rhs
-    ///
     AFAPI array min    (const array &lhs, const array &rhs);
 
     /// \copydoc min(const array&, const array &)
+    /// \deprecated use af::minOf instead
+    AF_DEPRECATED("Use min(array lhs, array rhs) instead. You can use "
+                  "constant(value, lhs.dims()) for the rhs array.")
     AFAPI array min    (const array &lhs, const double rhs);
 
     /// \copydoc min(const array&, const array &)
+    /// \deprecated use af::minOf instead
+    AF_DEPRECATED("Use min(array lhs, array rhs) instead. You can use "
+                  "constant(rhs, dim) for the rhs array.")
     AFAPI array min    (const double lhs, const array &rhs);
     /// @}
 
@@ -40,10 +45,20 @@ namespace af
     /// \return maximum of \p lhs and \p rhs
     AFAPI array max    (const array &lhs, const array &rhs);
 
-    /// \copydoc max(const array&, const array&)
+    AF_DEPRECATED("Use af::maxOf instead")
+    /// C++ Interface for max of two arrays or an array and a scalar
+    ///
+    /// \param[in] lhs first input
+    /// \param[in] rhs second input
+    /// \return maximum of \p lhs and \p rhs
     AFAPI array max    (const array &lhs, const double rhs);
 
-    /// \copydoc max(const array&, const array&)
+    AF_DEPRECATED("Use af::maxOf instead")
+    /// C++ Interface for max of two arrays or an array and a scalar
+    ///
+    /// \param[in] lhs first input
+    /// \param[in] rhs second input
+    /// \return maximum of \p lhs and \p rhs
     AFAPI array max    (const double lhs, const array &rhs);
     /// @}
 

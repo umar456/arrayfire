@@ -22,8 +22,12 @@ namespace af {
         return array(out);                                      \
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 INSTANTIATE(min, af_minof)
 INSTANTIATE(max, af_maxof)
+#pragma GCC diagnostic pop
+
 INSTANTIATE(pow, af_pow)
 INSTANTIATE(root, af_root)
 INSTANTIATE(rem, af_rem)
@@ -45,8 +49,11 @@ INSTANTIATE(hypot, af_hypot)
         return func(constant(lhs, rhs.dims(), ty), rhs);          \
     }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 WRAPPER(min)
 WRAPPER(max)
+#pragma GCC diagnostic pop
 WRAPPER(pow)
 WRAPPER(root)
 WRAPPER(rem)

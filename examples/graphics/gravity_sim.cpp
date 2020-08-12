@@ -126,7 +126,7 @@ void simulate(af::array &mass, vector<af::array> &pos, vector<af::array> &vels,
     }
 
     dist = sqrt(dist);
-    dist = af::max(min_dist, dist);
+    dist = af::max(constant(min_dist, dist.dims()), dist);
     dist *= dist * dist;
 
     for (int i = 0; i < (int)pos.size(); ++i) {
@@ -165,16 +165,19 @@ void collisions(vector<af::array> &pos, vector<af::array> &vels, bool is3D) {
     vels[0] = invalid_x * vels[0];
     vels[1] = invalid_y * vels[1];
 
-    af::array projected_px = min(width - 1, max(0, pos[0]));
-    af::array projected_py = min(height - 1, max(0, pos[1]));
-    pos[0]                 = projected_px;
-    pos[1]                 = projected_py;
+    af::array projected_px = min(constant(width - 1, pos[0].dims()),
+                                 max(constant(0, pos[0].dims()), pos[0]));
+    af::array projected_py =
+        min(height - 1, max(constant(0, pos[0].dims()), pos[1]));
+    pos[0] = projected_px;
+    pos[1] = projected_py;
 
     if (is3D) {
-        af::array invalid_z    = -2 * (pos[2] > depth - 1 || pos[2] < 0) + 1;
-        vels[2]                = invalid_z * vels[2];
-        af::array projected_pz = min(depth - 1, max(0, pos[2]));
-        pos[2]                 = projected_pz;
+        af::array invalid_z = -2 * (pos[2] > depth - 1 || pos[2] < 0) + 1;
+        vels[2]             = invalid_z * vels[2];
+        af::array projected_pz =
+            min(depth - 1, max(constant(0, pos[2].dims()), pos[2]));
+        pos[2] = projected_pz;
     }
 }
 
