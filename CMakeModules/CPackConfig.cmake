@@ -42,7 +42,7 @@ set(CPACK_PREFIX_DIR ${CMAKE_INSTALL_PREFIX})
 set(CPACK_PACKAGE_NAME "${LIBRARY_NAME}")
 set(CPACK_PACKAGE_VENDOR "${VENDOR_NAME}")
 set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY ${LIBRARY_NAME})
-set(CPACK_PACKAGE_CONTACT "ArrayFire Development Group <technical@arrayfire.com>")
+set(CPACK_PACKAGE_CONTACT "ArrayFire <technical@arrayfire.com>")
 set(MY_CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/assets/${APP_LOW_NAME}.ico")
 
 file(TO_NATIVE_PATH "${CMAKE_SOURCE_DIR}/assets/" NATIVE_ASSETS_PATH)
@@ -58,6 +58,9 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "${LIBRARY_NAME}")
 set(CPACK_COMPONENTS_ALL
   # Main arrayfire development package. Installs all headers and libraries
   arrayfire
+
+  # Main arrayfire development package. Installs all headers and libraries
+  dev
 
   # The CPU backend libraries only.
   cpu
@@ -121,9 +124,9 @@ af_component(
   REQUIRES arrayfire-cpu-dev ${arrayfire_cuda_dev_name} arrayfire-opencl-dev arrayfire-examples arrayfire-doc
   SUMMARY  "ArrayFire high performance library"
   DESCRIPTION  "ArrayFire
-ArrayFire is a general-purpose library that simplifies software
-development that targets parallel and massively-parallel architectures
-including CPUs, GPUs, and other hardware acceleration devices.")
+ ArrayFire is a general-purpose library that simplifies software
+ development that targets parallel and massively-parallel architectures
+ including CPUs, GPUs, and other hardware acceleration devices.")
 
 af_component(
   COMPONENT cpu

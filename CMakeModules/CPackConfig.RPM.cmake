@@ -17,18 +17,20 @@ set(CPACK_RPM_PACKAGE_VENDOR "ArrayFire")
 
 
 macro(af_rpm_component)
-  cmake_parse_arguments(RC "" "COMPONENT;NAME;SUMMARY;DESCRIPTION" "REQUIRES;OPTIONAL" ${ARGN})
+  cmake_parse_arguments(RC "" "COMPONENT;PACKAGE_NAME;SUMMARY;DESCRIPTION" "REQUIRES;OPTIONAL;PROVIDES;CONFLICTS" ${ARGN})
 
   string(REPLACE ";" ", " REQ "${RC_REQUIRES}")
   string(REPLACE ";" ", " OPT "${RC_OPTIONAL}")
   string(TOUPPER ${RC_COMPONENT} COMPONENT_UPPER)
 
-  if(RC_NAME)
-      set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_NAME "${RC_NAME}")
+  if(RC_PACKAGE_NAME)
+      set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_NAME "${RC_PACKAGE_NAME}")
   endif()
   # NOTE: Does not work in CentOS 6
   set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_SUGGESTS ${OPT})
   set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_REQUIRES "${REQ}")
+  set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_PROVIDES ${RC_PROVIDES})
+  set(CPACK_RPM_${COMPONENT_UPPER}_PACKAGE_CONFLICTS ${RC_CONFLICTS})
 endmacro()
 
 set(CPACK_RPM_MAIN_COMPONENT arrayfire)
@@ -38,48 +40,61 @@ af_rpm_component(
   REQUIRES arrayfire-cpu-dev ${arrayfire_cuda_dev_name} arrayfire-opencl-dev arrayfire-unified-dev arrayfire-examples arrayfire-doc
   )
 
+if(USE_CPU_MKL)
+  set(cpu_runtime_package_name arrayfire-cpu-mkl)
+  set(cpu_runtime_requirements "intel-mkl-core-rt-2020.0-166, intel-mkl-gnu-rt-2020.0-166")
+  set(cpu_runtime_conflicts "arrayfire-cpu-openblas")
+else()
+  set(cpu_runtime_package_name arrayfire-cpu-openblas)
+  set(cpu_runtime_requirements "fftw-libs, blas, lapack")
+  set(cpu_runtime_conflicts "arrayfire-cpu-mkl")
+endif()
+
 af_rpm_component(
   COMPONENT cpu
-  NAME arrayfire-cpu
+  PACKAGE_NAME ${cpu_runtime_package_name}
+  PROVIDES "arrayfire-cpu"
+  CONFLICTS ${cpu_runtime_conflicts}
+  REQUIRES ${cpu_runtime_requirements}
   OPTIONAL forge)
 
 af_rpm_component(
   COMPONENT cpu-dev
-  REQUIRES arrayfire-cpu arrayfire-headers arrayfire-cmake arrayfire-cpu-cmake
+  REQUIRES arrayfire-cpu arrayfire-headers arrayfire-cmake
   )
 
 af_rpm_component(
   COMPONENT cuda
-  NAME ${arrayfire_cuda_runtime_name}
+  PACKAGE_NAME arrayfire-cuda-cuda-${CUDA_VERSION_MAJOR}-${CUDA_VERSION_MINOR}
   OPTIONAL forge)
 
 af_rpm_component(
   COMPONENT cuda-dev
-  NAME ${arrayfire_cuda_dev_name}
-  REQUIRES ${arrayfire_cuda_runtime_name} arrayfire-headers arrayfire-cmake arrayfire-cuda-cmake)
+  PACKAGE_NAME arrayfire-cuda-dev
+  REQUIRES ${arrayfire_cuda_runtime_name} arrayfire-headers arrayfire-cmake)
 
 af_rpm_component(
   COMPONENT opencl
-  NAME arrayfire-opencl
+  PACKAGE_NAME arrayfire-opencl
   OPTIONAL forge)
 
 af_rpm_component(
   COMPONENT opencl-dev
-  REQUIRES arrayfire-opencl arrayfire-headers arrayfire-cmake arrayfire-opencl-cmake)
+  REQUIRES arrayfire-opencl arrayfire-headers arrayfire-cmake)
 
 af_rpm_component(
   COMPONENT unified
-  NAME arrayfire-unified
+  PACKAGE_NAME arrayfire-unified
   OPTIONAL forge)
 
 af_rpm_component(
   COMPONENT unified-dev
-  REQUIRES arrayfire-unified arrayfire-headers arrayfire-cmake arrayfire-unified-cmake
+  REQUIRES arrayfire-unified arrayfire-headers arrayfire-cmake
   OPTIONAL forge)
 
 af_rpm_component(
   COMPONENT documentation
-  NAME arrayfire-doc)
+  PACKAGE_NAME arrayfire-doc)
 
 # NOTE: These commands do not work well for forge. The
 # version or the package name is incorrect when you perform
@@ -89,7 +104,7 @@ af_rpm_component(
 
 #af_rpm_component(
 #  COMPONENT forge-lib
-#  NAME forge-runtime
+#  PACKAGE_NAME forge-runtime
 #  DESCRIPTION  )
 
 #cpack_add_component(forge-lib
