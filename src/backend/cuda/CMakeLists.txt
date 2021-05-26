@@ -364,6 +364,8 @@ cuda_add_library(afcuda
 
     EnqueueArgs.hpp
     all.cu
+    all_reduce.hpp
+    all_reduce.cpp
     anisotropic_diffusion.cpp
     any.cu
     approx.cpp
@@ -709,6 +711,7 @@ target_link_libraries(afcuda
     c_api_interface
     cpp_api_interface
     afcommon_interface
+    nccl
     ${CMAKE_DL_LIBS}
     ${CUDA_nvrtc_LIBRARY}
     af_cuda_static_cuda_library

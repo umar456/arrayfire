@@ -21,6 +21,8 @@ target_sources(afcpu
     $<$<PLATFORM_ID:Windows>:${af_cpu_ver_res_file}>
     Array.cpp
     Array.hpp
+    all_reduce.cpp
+    all_reduce.hpp
     anisotropic_diffusion.cpp
     anisotropic_diffusion.hpp
     approx.cpp

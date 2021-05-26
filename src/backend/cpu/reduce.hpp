@@ -9,6 +9,7 @@
 #pragma once
 #include <Array.hpp>
 #include <optypes.hpp>
+#include <vector>
 
 namespace cpu {
 template<af_op_t op, typename Ti, typename To>
@@ -22,4 +23,8 @@ void reduce_by_key(Array<Tk> &keys_out, Array<To> &vals_out,
 
 template<af_op_t op, typename Ti, typename To>
 To reduce_all(const Array<Ti> &in, bool change_nan = false, double nanval = 0);
+
+template<af_op_t op, typename Ti>
+void all_reduce(std::vector<Array<Ti>> in);
+
 }  // namespace cpu

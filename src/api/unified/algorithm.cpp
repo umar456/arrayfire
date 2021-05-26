@@ -182,3 +182,9 @@ af_err af_max_ragged(af_array *vals, af_array *idx, const af_array in,
     CHECK_ARRAYS(in, ragged_len);
     CALL(af_max_ragged, vals, idx, in, ragged_len, dim);
 }
+
+af_err af_all_sum(af_array *in, int count) {
+    CHECK_ARRAYS(in);
+    CALL(af_all_sum, in, count);
+    return AF_SUCCESS;
+}

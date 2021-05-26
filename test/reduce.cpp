@@ -14,9 +14,14 @@
 #include <af/traits.hpp>
 
 #include <algorithm>
+#include <cmath>
+#include <complex>
 #include <functional>
 #include <iostream>
+#include <limits>
+#include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 using af::array;
@@ -2065,3 +2070,121 @@ TEST(ReduceByKey, ISSUE_2955_dim) {
     ASSERT_EQ(ok.dims(0), 128);
     ASSERT_EQ(ov.dims(1), 128);
 }
+
+#ifdef AF_CUDA
+
+TEST(AllReduce, SingleThread) {
+
+  int dcount = af::getDeviceCount();
+  if(dcount > 1){
+    float result = 0.f;
+    std::vector<array> out(dcount);
+    for(int devid = 0; devid < dcount; devid++) {
+      af::setDevice(devid);
+      out[devid] = constant(devid+1.0f, 100, 16);
+      out[devid].eval();
+      result += devid +1.0f;
+    }
+
+    allSum(out.data(), out.size(), 0.0f);
+
+    af::setDevice(0);
+    array gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[0], gold);
+    af::setDevice(1);
+    gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[1], gold);
+  }
+}
+
+TEST(AllReduce, MultipleThreads) {
+  int dcount = af::getDeviceCount();
+  if(dcount > 1){
+    float result = 0.f;
+    std::vector<array> out(dcount);
+    std::vector<std::thread> threads;
+
+
+    for(int devid = 0; devid < dcount; devid++) {
+        threads.emplace_back([&out,devid](){
+          af::setDevice(devid);
+          out[devid] = constant(devid+1.0f, 100, 16);
+          out[devid].eval();
+        });
+        result += devid +1.0f;
+    }
+
+    for(int devid = 0; devid < dcount; devid++) {
+      threads[devid].join();
+    }
+
+    allSum(out.data(), out.size(), 0.0f);
+
+    af::setDevice(0);
+    array gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[0], gold);
+    af::setDevice(1);
+    gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[1], gold);
+  }
+}
+
+TEST(AllReduce, OutOfOrderDevices) {
+  int dcount = af::getDeviceCount();
+  if(dcount > 1){
+    float result = 0.f;
+    std::vector<array> out(dcount);
+    int i = 0;
+    for(int devid = dcount-1; devid >= 0; devid--) {
+      af::setDevice(devid);
+      out[i] = constant(i+1.0f, 100, 16);
+      out[i].eval();
+      result += devid +1.0f;
+      i++;
+    }
+
+    allSum(out.data(), out.size(), 0.0f);
+
+    af::setDevice(1);
+    array gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[0], gold);
+    af::setDevice(0);
+    gold = constant(result,100, 16);
+    ASSERT_ARRAYS_EQ(out[1], gold);
+  }
+}
+
+// TEST(AllReduce, SingleDevice) {
+//     float result = 0.f;
+//     af::setDevice(0);
+//     std::vector<array> out(2);
+//     for(int devid = 0; devid < 2; devid++) {
+//       out[devid] = constant(devid+1.0f, 100, 16);
+//       out[devid].eval();
+//       result += devid +1.0f;
+//     }
+// 
+//     allSum(out.data(), out.size(), 0.0f);
+// 
+//     array gold = constant(result,100, 16);
+//     ASSERT_ARRAYS_EQ(out[0], gold);
+//     ASSERT_ARRAYS_EQ(out[1], gold);
+// }
+// 
+// TEST(AllReduce, SingleDeviceIndexing) {
+//     float result = 0.f;
+//     std::vector<array> out(2);
+//     for(int devid = 0; devid < 2; devid++) {
+//       out[devid] = constant(devid+1.0f, 100, 16);
+//       out[devid].eval();
+//       result += devid +1.0f;
+//     }
+// 
+//     allSum(out.data(), out.size(), 0.0f);
+// 
+//     array gold = constant(result,100, 16);
+//     ASSERT_ARRAYS_EQ(out[0], gold);
+//     ASSERT_ARRAYS_EQ(out[1], gold);
+// }
+
+#endif

@@ -53,6 +53,8 @@ target_sources(afopencl
     Param.cpp
     Param.hpp
     all.cpp
+    all_reduce.cpp
+    all_reduce.hpp
     anisotropic_diffusion.cpp
     anisotropic_diffusion.hpp
     any.cpp

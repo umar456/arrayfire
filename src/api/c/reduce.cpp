@@ -7,6 +7,7 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 
+#include <all_reduce.hpp>
 #include <backend.hpp>
 #include <common/err_common.hpp>
 #include <common/half.hpp>
@@ -18,6 +19,8 @@
 #include <af/algorithm.h>
 #include <af/defines.h>
 #include <af/dim4.hpp>
+#include <algorithm>
+#include <vector>
 
 using af::dim4;
 using common::half;
@@ -951,4 +954,27 @@ af_err af_sum_nan_all(double *real, double *imag, const af_array in,
 af_err af_product_nan_all(double *real, double *imag, const af_array in,
                           const double nanval) {
     return reduce_all_promote<af_mul_t>(real, imag, in, true, nanval);
+}
+
+template<af_op_t OP, typename T>
+void allReduce(std::vector<Array<T> *> &in) {
+    evalMultiple(in);
+    detail::all_reduce<OP, T>(in);
+}
+
+template<af_op_t OP, typename T>
+void allReduce(af_array *in, int count) {
+    std::vector<Array<T> *> inArrays;
+    inArrays.reserve(count);
+    for (int i = 0; i < count; i++) { inArrays.push_back(&getArray<T>(in[i])); }
+
+    allReduce<OP, T>(inArrays);
+}
+
+af_err af_all_sum(af_array *in, int count) {
+    try {
+        allReduce<af_add_t, float>(in, count);
+    }
+    CATCHALL
+    return AF_SUCCESS;
 }

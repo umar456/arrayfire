@@ -16,8 +16,6 @@
 #include <err_cuda.hpp>
 #include <kernel/ireduce.hpp>
 
-#include <complex>
-
 using af::dim4;
 using common::half;
 

@@ -10,6 +10,8 @@
 #include <af/algorithm.h>
 #include <af/array.h>
 #include <af/compatible.h>
+#include <algorithm>
+#include <vector>
 #include "common.hpp"
 #include "error.hpp"
 
@@ -26,6 +28,12 @@ array sum(const array &in, const int dim, const double nanval) {
     return array(out);
 }
 
+void allSum(const array *in, const int count, const double nanval) {
+    std::vector<af_array> inArray(count);
+    for (int i = 0; i < count; i++) { inArray[i] = in[i].get(); }
+    AF_THROW(af_all_sum(inArray.data(), count));
+    return;
+}
 void sumByKey(array &keys_out, array &vals_out, const array &keys,
               const array &vals, const int dim) {
     af_array okeys, ovals;

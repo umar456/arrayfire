@@ -43,6 +43,21 @@ namespace af
     AFAPI array sum(const array &in, const int dim, const double nanval);
 #endif
 
+#if AF_API_VERSION >= 39
+    /**
+       C++ Interface for sum of elements in an array while replacing nan values
+
+       \param[in] in is the input array
+       \param[in] dim The dimension along which the add operation occurs
+       \param[in]  nanval   The value that will replace the NaNs in \p in
+       \return    result of sum all values along dimension \p dim
+
+       \ingroup reduce_func_sum
+
+    */
+    AFAPI void allSum(const array *in, const int count, const double nanval);
+#endif
+
 #if AF_API_VERSION >= 37
     /**
        C++ Interface for sum of elements along given dimension by key
@@ -673,6 +688,20 @@ extern "C" {
        \ingroup reduce_func_sum
     */
     AFAPI af_err af_sum(af_array *out, const af_array in, const int dim);
+
+#if AF_API_VERSION >= 39
+    /**
+       C Interface for sum of elements in an array
+
+       \param[out] out will contain the sum of all values in \p in along \p dim
+       \param[in] in is the input array
+       \param[in] dim The dimension along which the add operation occurs
+       \return \ref AF_SUCCESS if the execution completes properly
+
+       \ingroup reduce_func_sum
+    */
+    AFAPI af_err af_all_sum(af_array *in, const int count);
+#endif
 
 #if AF_API_VERSION >= 31
     /**
