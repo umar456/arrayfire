@@ -42,14 +42,13 @@
 
 #include <algorithm>
 #include <array>
-#include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <mutex>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
-#include <vector>
 
 using std::call_once;
 using std::once_flag;
@@ -390,7 +389,10 @@ cudaStream_t getStream(int device) {
 cudaStream_t getActiveStream() { return getStream(getActiveDeviceId()); }
 
 size_t getDeviceMemorySize(int device) {
-    return getDeviceProp(device).totalGlobalMem;
+    /// Use up to 85% of system memory since we are using managed memory for
+    /// allocation
+    return std::max(static_cast<size_t>(getHostMemorySize() * 0.85),
+                    getDeviceProp(device).totalGlobalMem);
 }
 
 size_t getHostMemorySize() { return common::getHostMemorySize(); }
@@ -418,8 +420,8 @@ MemoryManagerBase &memoryManager() {
             getDeviceCount(), common::MAX_BUFFERS,
             AF_MEM_DEBUG || AF_CUDA_MEM_DEBUG);
         // Set the memory manager's device memory manager
-        std::unique_ptr<cuda::Allocator> deviceMemoryManager(
-            new cuda::Allocator());
+        std::unique_ptr<cuda::ManagedAllocator> deviceMemoryManager(
+            new cuda::ManagedAllocator());
         inst.memManager->setAllocator(std::move(deviceMemoryManager));
         inst.memManager->initialize();
     });

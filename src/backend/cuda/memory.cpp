@@ -24,8 +24,8 @@
 #include <types.hpp>
 #include <af/dim4.hpp>
 
+#include <cstdlib>
 #include <mutex>
-#include <utility>
 
 using af::dim4;
 using common::bytesToString;
@@ -190,4 +190,37 @@ void AllocatorPinned::nativeFree(void *ptr) {
     cudaError_t err = cudaFreeHost(ptr);
     if (err != cudaErrorCudartUnloading) { CUDA_CHECK(err); }
 }
+
+ManagedAllocator::ManagedAllocator() { logger = common::loggerFactory("mem"); }
+
+void ManagedAllocator::shutdown() {
+    for (int n = 0; n < cuda::getDeviceCount(); n++) {
+        try {
+            cuda::setDevice(n);
+            shutdownMemoryManager();
+        } catch (const AfError &err) {
+            continue;  // Do not throw any errors while shutting down
+        }
+    }
+}
+
+int ManagedAllocator::getActiveDeviceId() { return cuda::getActiveDeviceId(); }
+
+size_t ManagedAllocator::getMaxMemorySize(int id) {
+    return cuda::getDeviceMemorySize(id);
+}
+
+void *ManagedAllocator::nativeAlloc(const size_t bytes) {
+    void *ptr = NULL;
+    CUDA_CHECK(cudaMallocManaged(&ptr, bytes));
+    AF_TRACE("nativeManagedAlloc: {:>7} {}", bytesToString(bytes), ptr);
+    return ptr;
+}
+
+void ManagedAllocator::nativeFree(void *ptr) {
+    AF_TRACE("nativeFree:          {}", ptr);
+    cudaError_t err = cudaFree(ptr);
+    if (err != cudaErrorCudartUnloading) { CUDA_CHECK(err); }
+}
+
 }  // namespace cuda

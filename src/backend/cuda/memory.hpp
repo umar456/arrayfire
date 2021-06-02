@@ -10,7 +10,6 @@
 
 #include <common/AllocatorInterface.hpp>
 
-#include <cstdlib>
 #include <functional>
 #include <memory>
 
@@ -58,6 +57,21 @@ bool jitTreeExceedsMemoryPressure(size_t bytes);
 void setMemStepSize(size_t step_bytes);
 size_t getMemStepSize(void);
 
+/// Managed memory allocator which uses cudaMallocManaged to allocate memory.
+/// This memory manager allows for oversubscription of the GPU memory at the
+/// cost of some overhead
+class ManagedAllocator final : public common::memory::AllocatorInterface {
+   public:
+    ManagedAllocator();
+    ~ManagedAllocator() = default;
+    void shutdown() override;
+    int getActiveDeviceId() override;
+    size_t getMaxMemorySize(int id) override;
+    void *nativeAlloc(const size_t bytes) override;
+    void nativeFree(void *ptr) override;
+};
+
+// Basic memory allocator which uses cudaMalloc to allocate memory
 class Allocator final : public common::memory::AllocatorInterface {
    public:
     Allocator();

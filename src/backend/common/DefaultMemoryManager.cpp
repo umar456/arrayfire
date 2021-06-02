@@ -16,6 +16,8 @@
 #include <af/event.h>
 #include <af/memory.h>
 
+#include <algorithm>
+#include <cstdio>
 #include <memory>
 #include <string>
 #include <vector>
@@ -161,6 +163,12 @@ void *DefaultMemoryManager::alloc(bool user_lock, const unsigned ndims,
             // Perhaps look at total memory available as a metric
             if (current.lock_bytes >= current.max_bytes ||
                 current.total_buffers >= this->max_buffers) {
+                AF_TRACE(
+                    "Cleaning up because lock_bytes({}) >= max_bytes({}) || "
+                    "total_buffers({}) >= max_buffers({})",
+                    bytesToString(current.lock_bytes),
+                    bytesToString(current.max_bytes), current.total_buffers,
+                    this->max_buffers);
                 this->signalMemoryCleanup();
             }
 
@@ -187,6 +195,7 @@ void *DefaultMemoryManager::alloc(bool user_lock, const unsigned ndims,
             } catch (const AfError &ex) {
                 // If out of memory, run garbage collect and try again
                 if (ex.getError() != AF_ERR_NO_MEM) { throw; }
+                AF_TRACE("Failed to allocate {}", bytesToString(alloc_bytes));
                 this->signalMemoryCleanup();
                 ptr = this->nativeAlloc(alloc_bytes);
             }
