@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Array.hpp>
+#include <common/Logger.hpp>
 #include <common/half.hpp>
 #include <common/jit/UnaryNode.hpp>
 #include <err_cuda.hpp>
@@ -16,7 +17,6 @@
 #include <optypes.hpp>
 #include <types.hpp>
 #include <af/dim4.hpp>
-#include <complex>
 
 namespace cuda {
 
@@ -86,6 +86,11 @@ struct CastOp<unsigned char, common::half> {
 
 template<typename To, typename Ti>
 struct CastWrapper {
+    static spdlog::logger *getLogger() noexcept {
+        static std::shared_ptr<spdlog::logger> logger =
+            common::loggerFactory("ast");
+        return logger.get();
+    }
     Array<To> operator()(const Array<Ti> &in) {
         CastOp<To, Ti> cop;
         common::Node_ptr in_node = in.getNode();
@@ -102,6 +107,8 @@ struct CastWrapper {
             if (in_in_node->getType() == to_dtype) {
                 // ignore the input node and simply connect a noop node from the
                 // child's child to produce this op's output
+                AF_TRACE("Cast optimiztion performed by removing cast to {}",
+                         dtype_traits<Ti>::getName());
                 return createNodeArray<To>(in.dims(), in_in_node);
             }
         }

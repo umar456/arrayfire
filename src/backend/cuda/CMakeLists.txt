@@ -324,6 +324,7 @@ if(UNIX)
   target_link_libraries(af_cuda_static_cuda_library
     PRIVATE
       Boost::boost
+      spdlog
       ${CMAKE_DL_LIBS}
       ${cusolver_lib}
       ${START_GROUP}
