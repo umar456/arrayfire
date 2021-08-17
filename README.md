@@ -1,14 +1,10 @@
-<a href="http://arrayfire.com/"><img src="http://arrayfire.com/logos/arrayfire_logo_whitebkgnd.png" width="300"></a>
+
+<p align="center"><a href="http://arrayfire.com/"><img src="http://arrayfire.com/logos/arrayfire_logo_whitebkgnd.png" width="600"></a></p>
 
 ArrayFire is a general-purpose tensor library that simplifies the process of
-software development for the parallel architectures found in CPUs, GPUs, and 
+software development for the parallel architectures found in CPUs, GPUs, and
 other hardware acceleration devices. The library serves users in every technical
 computing market.
-
-The community of ArrayFire developers invites you to build with us if you are
-interested and able to write top-performing tensor functions. Together we can fulfill
-[The ArrayFire Mission](https://github.com/arrayfire/arrayfire/wiki/The-ArrayFire-Mission-Statement)
-under an excellent Code of Conduct that promotes a respectful and friendly building experience.
 
 Several of ArrayFire's benefits include:
 
@@ -30,17 +26,16 @@ Several of ArrayFire's benefits include:
 * Commercially friendly open-source licensing
 * Enterprise support from [ArrayFire](http://arrayfire.com)
 
-ArrayFire provides software developers with a high-level
-abstraction of data that resides on the accelerator, the `af::array` object.
-Developers write code that performs operations on ArrayFire arrays, which, in turn,
-are automatically translated into near-optimal kernels that execute on the computational
-device.
+ArrayFire provides software developers with a high-level abstraction of data
+that resides on the accelerator, the `af::array` object. Developers write code
+that performs operations on ArrayFire arrays, which, in turn, are automatically
+translated into near-optimal kernels that execute on the computational device.
 
-ArrayFire runs on devices ranging from low-power mobile phones
-to high-power GPU-enabled supercomputers. ArrayFire runs on CPUs from all
-major vendors (Intel, AMD, ARM), GPUs from the prominent manufacturers
-(NVIDIA, AMD, and Qualcomm), as well as a variety of other accelerator devices
-on Windows, Mac, and Linux.
+ArrayFire runs on devices ranging from low-power mobile phones to high-power
+GPU-enabled supercomputers. ArrayFire runs on CPUs from all major vendors
+(Intel, AMD, ARM), GPUs from the prominent manufacturers (NVIDIA, AMD, and
+Qualcomm), as well as a variety of other accelerator devices on Windows, Mac,
+and Linux.
 
 # Getting ArrayFire
 
@@ -80,18 +75,22 @@ array predict(const array &X, const array &W) {
 array train(const array &X, const array &Y,
         double alpha = 0.1, double maxerr = 0.05,
         int maxiter = 1000, bool verbose = false) {
-    // Initialize parameters to 0
     array Weights = constant(0, X.dims(1), Y.dims(1));
 
     for (int i = 0; i < maxiter; i++) {
         array P   = predict(X, Weights);
         array err = Y - P;
-        if (mean<float>(abs(err) < maxerr)
-            break;
+        if (mean<float>(abs(err) < maxerr) break;
         Weights += alpha * matmulTN(X, err);
     }
     return Weights;
 }
+...
+
+array Weights = train(train_feats, train_targets);
+array test_outputs  = predict(test_feats, Weights);
+display_results<true>(test_images, test_outputs,
+                      test_targets, 20);
 ```
 
 The complete source code can be found [here][31].
@@ -125,8 +124,14 @@ __In-Progress Wrappers__
 
 # Contributing
 
+The community of ArrayFire developers invites you to build with us if you are
+interested and able to write top-performing tensor functions. Together we can
+fulfill [The ArrayFire
+Mission](https://github.com/arrayfire/arrayfire/wiki/The-ArrayFire-Mission-Statement)
+for fast scientific computing for all.
+
 Contributions of any kind are welcome! Please refer to
-[the wiki](https://github.com/arrayfire/arrayfire/wiki)
+[the wiki](https://github.com/arrayfire/arrayfire/wiki) and our [Code of Conduct](33)
 to learn more about how you can get involved with the ArrayFire Community
 through [Sponsorship](https://github.com/arrayfire/arrayfire/wiki/Sponsorship), [Developer Commits](https://github.com/arrayfire/arrayfire/wiki/Contributing-Code-to-ArrayFire), or [Governance](https://github.com/arrayfire/arrayfire/wiki/Governance).
 
@@ -184,3 +189,4 @@ If you wish to use either of these marks in your own project, please consult
 [30]: https://github.com/bitstormGER/ArrayFire-Nim
 [31]: https://github.com/arrayfire/arrayfire/blob/master/examples/machine_learning/perceptron.cpp
 [32]: https://github.com/arrayfire/arrayfire/wiki/Getting-ArrayFire
+[33]: https://github.com/arrayfire/arrayfire/wiki/Code-Of-Conduct
