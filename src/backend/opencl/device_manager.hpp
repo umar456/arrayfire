@@ -103,6 +103,8 @@ class DeviceManager {
 
     friend cl::CommandQueue& getQueue();
 
+    friend cl_command_queue getQueueHandle(int device_id);
+
     friend const cl::Device& getDevice(int id);
 
     friend size_t getDeviceMemorySize(int device);
