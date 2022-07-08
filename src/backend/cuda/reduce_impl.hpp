@@ -13,7 +13,7 @@
 
 #undef _GLIBCXX_USE_INT128
 #include <Array.hpp>
-#include <Event.hpp>
+#include <common/Event.hpp>
 #include <err_cuda.hpp>
 #include <kernel/reduce.hpp>
 #include <kernel/reduce_by_key.hpp>
@@ -121,7 +121,7 @@ void reduce_by_key_dim(Array<Tk> &keys_out, Array<To> &vals_out,
         CUDA_CHECK(cudaMemcpyAsync(
             &n_reduced_host, reduced_block_sizes.get() + (numBlocksD0 - 1),
             sizeof(int), cudaMemcpyDeviceToHost, getActiveStream()));
-        Event reduce_host_event = makeEvent(getActiveStream());
+        common::Event reduce_host_event = common::makeEvent(getActiveStream());
 
         // reset flags
         CUDA_CHECK(cudaMemsetAsync(needs_another_reduction.get(), 0,
@@ -268,7 +268,7 @@ void reduce_by_key_first(Array<Tk> &keys_out, Array<To> &vals_out,
         CUDA_CHECK(cudaMemcpyAsync(
             &n_reduced_host, reduced_block_sizes.get() + (numBlocksD0 - 1),
             sizeof(int), cudaMemcpyDeviceToHost, getActiveStream()));
-        Event reduce_host_event = makeEvent(getActiveStream());
+        common::Event reduce_host_event = common::makeEvent(getActiveStream());
 
         // reset flags
         CUDA_CHECK(cudaMemsetAsync(needs_another_reduction.get(), 0,

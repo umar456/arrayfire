@@ -96,8 +96,6 @@ target_sources(afopencl
     err_opencl.hpp
     errorcodes.cpp
     errorcodes.hpp
-    Event.hpp
-    Event.cpp
     exampleFunction.cpp
     exampleFunction.hpp
     fast.cpp
@@ -170,6 +168,7 @@ target_sources(afopencl
     platform.hpp
     plot.cpp
     plot.hpp
+    Policy.hpp
     print.hpp
     product.cpp
     qr.cpp

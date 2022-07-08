@@ -9,8 +9,9 @@
 
 #pragma once
 
-#include <Event.hpp>
 #include <common/AllocatorInterface.hpp>
+
+#include <af/defines.h>
 
 #include <cstddef>
 #include <memory>

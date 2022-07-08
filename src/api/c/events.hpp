@@ -9,11 +9,23 @@
 
 #pragma once
 
-#include <Event.hpp>
+#include <common/Event.hpp>
+#include <Policy.hpp>
 #include <backend.hpp>
 #include <af/event.h>
 
-af_event getHandle(detail::Event& event);
+af_event getHandle(common::Event& event);
 
-detail::Event& getEvent(af_event& eventHandle);
-const detail::Event& getEvent(const af_event& eventHandle);
+common::Event& getEvent(af_event& eventHandle);
+
+const common::Event& getEvent(const af_event& eventHandle);
+
+af_event createEvent();
+
+void markEventOnActiveQueue(af_event eventHandle);
+
+void enqueueWaitOnActiveQueue(af_event eventHandle);
+
+void block(af_event eventHandle);
+
+af_event createAndMarkEvent();

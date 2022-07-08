@@ -259,8 +259,6 @@ add_library(afcuda
     bilateral.cpp
     canny.cpp
     count.cu
-    Event.cpp
-    Event.hpp
     exampleFunction.cpp
     fast.cu
     harris.cu
@@ -486,6 +484,7 @@ add_library(afcuda
     platform.hpp
     plot.cpp
     plot.hpp
+    Policy.hpp
     print.hpp
     qr.cpp
     qr.hpp

@@ -7,7 +7,9 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 #pragma once
-#include <utility>
+
+#include <Policy.hpp>
+#include <backend.hpp>
 
 namespace common {
 
@@ -36,21 +38,18 @@ class EventBase {
 
     /// \brief Event destructor. Calls the destroy event call on the native API
     ~EventBase() noexcept {
-        // if (e_)
-        NativeEventPolicy::destroyEvent(&e_);
+        if (e_) NativeEventPolicy::destroyEvent(e_);
     }
 
     /// \brief Creates the event object by calling the native create API
-    ErrorType create() noexcept {
-        return NativeEventPolicy::createAndMarkEvent(&e_);
-    }
+    ErrorType create() noexcept { return NativeEventPolicy::createEvent(&e_); }
 
     /// \brief Adds the event on the queue. Once this point on the program
     ///        is executed, the event is marked complete.
     ///
     /// \returns the error code for the mark call
     ErrorType mark(QueueType queue) noexcept {
-        return NativeEventPolicy::markEvent(&e_, queue);
+        return NativeEventPolicy::markEvent(queue, e_);
     }
 
     /// \brief This is an asynchronous function which will block the
@@ -61,15 +60,19 @@ class EventBase {
     ///
     /// \returns the error code for the wait call
     ErrorType enqueueWait(QueueType queue) noexcept {
-        return NativeEventPolicy::waitForEvent(&e_, queue);
+        return NativeEventPolicy::waitForEvents(queue, 1, &e_);
     }
 
     /// \brief This function will block the calling thread until the event has
     ///        completed
-    ErrorType block() noexcept { return NativeEventPolicy::syncForEvent(&e_); }
+    ErrorType block() noexcept {
+        return NativeEventPolicy::syncForEvents(1, &e_);
+    }
 
     /// \brief Returns true if the event is a valid event.
     constexpr operator bool() const { return e_; }
+
+    operator EventType &() { return e_; }
 
     EventBase &operator=(EventBase &other) = delete;
 
@@ -79,5 +82,15 @@ class EventBase {
         return *this;
     }
 };
+
+using Event = EventBase<detail::Policy>;
+
+/// \brief Creates a new event and marks it in the queue
+inline Event makeEvent(detail::Policy::QueueType queue) {
+    Event e;
+    POLICY_ASSERT(e.create());
+    POLICY_ASSERT(e.mark(queue));
+    return e;
+}
 
 }  // namespace common

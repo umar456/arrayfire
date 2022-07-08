@@ -51,8 +51,6 @@ target_sources(afcpu
     diff.cpp
     diff.hpp
     err_cpu.hpp
-    Event.cpp
-    Event.hpp
     exampleFunction.cpp
     exampleFunction.hpp
     fast.cpp
@@ -122,6 +120,7 @@ target_sources(afcpu
     platform.hpp
     plot.cpp
     plot.hpp
+    Policy.hpp
     print.hpp
     qr.cpp
     qr.hpp

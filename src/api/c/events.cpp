@@ -9,16 +9,16 @@
 
 #include <events.hpp>
 
-#include <Event.hpp>
+#include <common/Event.hpp>
 #include <common/err_common.hpp>
+#include <platform.hpp>
 #include <af/device.h>
 #include <af/event.h>
 
-using detail::block;
-using detail::createEvent;
-using detail::enqueueWaitOnActiveQueue;
-using detail::Event;
-using detail::markEventOnActiveQueue;
+using common::Event;
+using detail::getActiveDeviceId;
+using detail::getQueueHandle;
+using std::make_unique;
 
 Event &getEvent(af_event &handle) {
     Event &event = *static_cast<Event *>(handle);
@@ -32,10 +32,40 @@ const Event &getEvent(const af_event &handle) {
 
 af_event getHandle(Event &event) { return static_cast<af_event>(&event); }
 
+af_event createEventHandle() {
+    // Ensure that the default queue is initialized
+    auto e = make_unique<Event>();
+    POLICY_ASSERT(e->create());
+    return getHandle(*e.release());
+}
+
+void markEventOnActiveQueue(af_event eventHandle) {
+    Event &event = getEvent(eventHandle);
+    // Use the currently-active queue
+    POLICY_ASSERT(event.mark(getQueueHandle(getActiveDeviceId())));
+}
+
+void enqueueWaitOnActiveQueue(af_event eventHandle) {
+    Event &event = getEvent(eventHandle);
+    // Use the currently-active queue
+    POLICY_ASSERT(event.enqueueWait(getQueueHandle(getActiveDeviceId())));
+}
+
+void block(af_event eventHandle) {
+    Event &event = getEvent(eventHandle);
+    POLICY_ASSERT(event.block());
+}
+
+af_event createAndMarkEvent() {
+    af_event handle = createEventHandle();
+    markEventOnActiveQueue(handle);
+    return handle;
+}
+
 af_err af_create_event(af_event *handle) {
     try {
         AF_CHECK(af_init());
-        *handle = createEvent();
+        *handle = createEventHandle();
     }
     CATCHALL;
 

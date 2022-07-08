@@ -9,7 +9,6 @@
 
 #include <memory.hpp>
 
-#include <Event.hpp>
 #include <common/Logger.hpp>
 #include <common/MemoryManagerBase.hpp>
 #include <common/dispatch.hpp>
