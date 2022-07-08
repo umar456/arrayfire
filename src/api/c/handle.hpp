@@ -9,6 +9,7 @@
 
 #pragma once
 #include <Array.hpp>
+#include <Policy.hpp>
 #include <backend.hpp>
 #include <common/err_common.hpp>
 #include <common/traits.hpp>
@@ -30,6 +31,14 @@ af::dim4 verifyDims(const unsigned ndims, const dim_t *const dims);
 af_array createHandle(const af::dim4 &d, af_dtype dtype);
 
 af_array createHandleFromValue(const af::dim4 &d, double val, af_dtype dtype);
+
+/// This function creates an af_array handle from memory handle on the device.
+///
+/// \param[in] d The shape of the new af_array
+/// \param[in] dtype The type of the new af_array
+/// \param[in] data The handle to the device memory
+/// \returns a new af_array with a view to the \p data pointer
+af_array createHandleFromDeviceData(const af::dim4 &d, af_dtype dtype, detail::Policy::MemoryType data);
 
 template<typename To>
 detail::Array<To> castArray(const af_array &in);
