@@ -18,8 +18,7 @@ namespace cuda {
 float getMemoryPressure();
 float getMemoryPressureThreshold();
 
-template<typename T>
-void memFree(T *ptr);
+void memFree(void *ptr);
 
 template<typename T>
 using uptr = std::unique_ptr<T[], std::function<void(T[])>>;
@@ -41,8 +40,7 @@ bool isLocked(const void *ptr);
 
 template<typename T>
 T *pinnedAlloc(const size_t &elements);
-template<typename T>
-void pinnedFree(T *ptr);
+void pinnedFree(void *ptr);
 
 void deviceMemoryInfo(size_t *alloc_bytes, size_t *alloc_buffers,
                       size_t *lock_bytes, size_t *lock_buffers);

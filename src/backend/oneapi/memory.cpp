@@ -85,8 +85,7 @@ void *memAllocUser(const size_t &bytes) {
     // return new cl::Buffer(buf, true);
 }
 
-template<typename T>
-void memFree(T *ptr) {
+void memFree(void *ptr) {
     ONEAPI_NOT_SUPPORTED("memFree Not supported");
 
     // cl::Buffer *buf = reinterpret_cast<cl::Buffer *>(ptr);
@@ -166,8 +165,7 @@ T *pinnedAlloc(const size_t &elements) {
     return static_cast<T *>(nullptr);
 }
 
-template<typename T>
-void pinnedFree(T *ptr) {
+void pinnedFree(void *ptr) {
     // pinnedMemoryManager().unlock(static_cast<void *>(ptr), false);
 }
 
@@ -176,9 +174,7 @@ void pinnedFree(T *ptr) {
     template std::unique_ptr<sycl::buffer<T>,                        \
                              std::function<void(sycl::buffer<T> *)>> \
     memAlloc(const size_t &elements);                                \
-    template void memFree(T *ptr);                                   \
     template T *pinnedAlloc(const size_t &elements);                 \
-    template void pinnedFree(T *ptr);                                \
     template void bufferFree(sycl::buffer<T> *buf);                  \
     template void memLock(const sycl::buffer<T> *buf);               \
     template void memUnlock(const sycl::buffer<T> *buf);
@@ -205,10 +201,6 @@ void *pinnedAlloc<void>(const size_t &elements) {
     // dim4 dims(elements);
     // void *ptr = pinnedMemoryManager().alloc(false, 1, dims.get(), sizeof(T));
     return static_cast<void *>(nullptr);
-}
-template<>
-void pinnedFree(void *ptr) {
-    // pinnedMemoryManager().unlock(ptr, false);
 }
 
 Allocator::Allocator() { logger = common::loggerFactory("mem"); }
