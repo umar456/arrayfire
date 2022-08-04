@@ -37,7 +37,7 @@ struct ThrustAllocator : thrust::device_malloc_allocator<T> {
 
     void deallocate(pointer p, size_type n) {
         UNUSED(n);
-        memFree<T>(p.get());  // delegate to ArrayFire allocator
+        memFree(p.get());  // delegate to ArrayFire allocator
     }
 };
 }  // namespace cuda

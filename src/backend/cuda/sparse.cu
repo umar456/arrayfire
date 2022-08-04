@@ -321,9 +321,9 @@ SparseArray<T> sparseConvertStorageToStorage(const SparseArray<T> &in) {
             converted.getRowIdx().get(), converted.getColIdx().get(),
             &pBufferSizeInBytes));
         shared_ptr<char> pBuffer(memAlloc<char>(pBufferSizeInBytes).release(),
-                                 memFree<char>);
+                                 memFree);
 
-        shared_ptr<int> P(memAlloc<int>(nNZ).release(), memFree<int>);
+        shared_ptr<int> P(memAlloc<int>(nNZ).release(), memFree);
         CUSPARSE_CHECK(
             _.cusparseCreateIdentityPermutation(sparseHandle(), nNZ, P.get()));
 
@@ -354,9 +354,9 @@ SparseArray<T> sparseConvertStorageToStorage(const SparseArray<T> &in) {
                 cooT.getRowIdx().get(), cooT.getColIdx().get(),
                 &pBufferSizeInBytes));
             shared_ptr<char> pBuffer(
-                memAlloc<char>(pBufferSizeInBytes).release(), memFree<char>);
+                memAlloc<char>(pBufferSizeInBytes).release(), memFree);
 
-            shared_ptr<int> P(memAlloc<int>(nNZ).release(), memFree<int>);
+            shared_ptr<int> P(memAlloc<int>(nNZ).release(), memFree);
             CUSPARSE_CHECK(_.cusparseCreateIdentityPermutation(sparseHandle(),
                                                                nNZ, P.get()));
 
