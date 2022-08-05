@@ -20,13 +20,8 @@ using detail::getActiveDeviceId;
 using detail::getQueueHandle;
 using std::make_unique;
 
-Event &getEvent(af_event &handle) {
+Event &getEvent(af_event handle) {
     Event &event = *static_cast<Event *>(handle);
-    return event;
-}
-
-const Event &getEvent(const af_event &handle) {
-    const Event &event = *static_cast<const Event *>(handle);
     return event;
 }
 
