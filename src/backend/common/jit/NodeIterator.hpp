@@ -28,7 +28,7 @@ class NodeIterator {
 
    private:
     std::vector<pointer> tree;
-    size_t index;
+    size_t index = 0;
 
     /// Copies the children of the \p n Node to the end of the tree vector
     void copy_children_to_end(Node* n) {
@@ -45,7 +45,7 @@ class NodeIterator {
     /// NodeIterator Constructor
     ///
     /// \param[in] root The root node of the tree
-    NodeIterator(pointer root) : tree{root}, index(0) {
+    NodeIterator(pointer root) : tree{root} {
         tree.reserve(root->getHeight() * 8);
     }
 
