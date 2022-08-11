@@ -11,6 +11,7 @@
 
 #include <cl2hpp.hpp>
 #include <memory.hpp>
+#include <nonstd/span.hpp>
 #include <platform.hpp>
 
 #include <common/err_common.hpp>
@@ -26,7 +27,7 @@ class Policy {
 
     static const ErrorType SUCCESS_CODE = CL_SUCCESS;
 
-    static ErrorType destroyQueue(QueueType queue) {
+    static ErrorType destroyQueue(QueueType queue) noexcept {
         return clReleaseCommandQueue(queue);
     }
 
@@ -42,7 +43,7 @@ class Policy {
         }
     }
 
-    static ErrorType createQueue(QueueType *q) {
+    static ErrorType createQueue(QueueType *q) noexcept {
         cl_int success = CL_SUCCESS;
         *q = clCreateCommandQueue(getContext()(), getDevice()(), 0, &success);
         return success;
@@ -50,64 +51,55 @@ class Policy {
 
     /// If the event is an already existing event, then release it and
     /// before calling another funciton that assigns to that event
-    static ErrorType checkReuseAndRelease(EventType event) {
+    static ErrorType checkReuseAndRelease(EventType event) noexcept {
         if (event) { return clReleaseEvent(event); }
         return CL_SUCCESS;
     }
 
     static ErrorType memcpyToDevice(QueueType q, MemoryType gpu_mem,
                                     void *pinned_mem, size_t write_bytes,
-                                    size_t offset_bytes, EventType wait_event,
-                                    EventType &write_event) {
+                                    size_t offset_bytes,
+                                    nonstd::span<EventType> wait_event,
+                                    EventType &write_event) noexcept {
         checkReuseAndRelease(write_event);
         return clEnqueueWriteBuffer(q, gpu_mem, CL_FALSE, offset_bytes,
-                                    write_bytes, pinned_mem, wait_event ? 1 : 0,
-                                    wait_event ? &wait_event : nullptr,
-                                    &write_event);
+                                    write_bytes, pinned_mem, wait_event.size(),
+                                    wait_event.data(), &write_event);
     }
 
     static MemoryType allocateMemory(size_t bytes, ErrorType *err = nullptr) {
-        cl::Buffer *buf = memAlloc<char>(bytes).release();
-        cl_mem out      = (*buf)();
-        clRetainMemObject(out);
+        cl::Buffer *buf   = memAlloc<char>(bytes).release();
+        cl_mem out        = (*buf)();
+        ErrorType err_out = clRetainMemObject(out);
+        if (err) { *err = err_out; }
         delete buf;
         return out;
     }
 
-    static ErrorType createEvent(EventType *e) {
-        e = nullptr;
-        return CL_SUCCESS;
+    static ErrorType createEvent(EventType *e) noexcept {
+        ErrorType err;
+        *e = clCreateUserEvent(getContext()(), &err);
+        clSetUserEventStatus(*e, CL_COMPLETE);
+        return err;
     }
 
-    static ErrorType destroyEvent(EventType e) { return clReleaseEvent(e); }
-
-    static bool isInitialized(int nEvents, EventType *events) {
-        bool valid = true;
-        for (int i = 0; i < nEvents; i++) {
-            if (events[i] == nullptr) valid = false;
-        }
-        return valid;
+    static ErrorType destroyEvent(EventType e) noexcept {
+        return clReleaseEvent(e);
     }
 
-    static ErrorType syncForEvents(int nEvents, EventType *events) {
-        auto err = CL_SUCCESS;
-        if (isInitialized(nEvents, events)) {
-            err = clWaitForEvents(nEvents, events);
-        }
+    static ErrorType syncForEvents(int nEvents, EventType *events) noexcept {
+        auto err = clWaitForEvents(nEvents, events);
         return err;
     }
 
     static ErrorType waitForEvents(QueueType queue, int nEvents,
-                                   EventType *events) {
-        auto err = CL_SUCCESS;
-        if (isInitialized(nEvents, events)) {
-            err = clEnqueueMarkerWithWaitList(queue, nEvents, events, nullptr);
-        }
+                                   EventType *events) noexcept {
+        auto err = clEnqueueMarkerWithWaitList(queue, nEvents, events, nullptr);
         return err;
     }
 
-    static ErrorType markEvent(QueueType &queue, EventType &event) {
-        checkReuseAndRelease(event);
+    static ErrorType markEvent(QueueType &queue, EventType &event) noexcept {
+        if (auto err = checkReuseAndRelease(event)) { return err; }
         return clEnqueueMarkerWithWaitList(queue, 0, nullptr, &event);
     }
 };

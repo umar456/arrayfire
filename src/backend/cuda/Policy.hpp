@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <nonstd/span.hpp>
+
 #include <memory.hpp>
 #include <platform.hpp>
 
@@ -24,11 +26,11 @@ class Policy {
     using ErrorType  = CUresult;
     using MemoryType = void *;
 
-    static ErrorType createQueue(QueueType *q) {
+    static ErrorType createQueue(QueueType *q) noexcept {
         return cuStreamCreate(q, CU_STREAM_NON_BLOCKING);
     }
 
-    static ErrorType destroyQueue(QueueType queue) {
+    static ErrorType destroyQueue(QueueType queue) noexcept {
         return cuStreamDestroy(queue);
     }
 
@@ -47,11 +49,14 @@ class Policy {
     }
     static ErrorType memcpyToDevice(QueueType &q, MemoryType gpu_mem,
                                     MemoryType pinned_mem, size_t write_bytes,
-                                    size_t offset_bytes, EventType wait_event,
-                                    EventType &write_event) {
+                                    size_t offset_bytes,
+                                    nonstd::span<EventType> wait_events,
+                                    EventType &write_event) noexcept {
         ErrorType err = CUDA_SUCCESS;
-        if (wait_event) {
-            err = cuStreamWaitEvent(q, wait_event, CU_EVENT_WAIT_DEFAULT);
+        if (!wait_events.empty()) {
+            for (EventType event : wait_events) {
+                err = cuStreamWaitEvent(q, event, CU_EVENT_WAIT_DEFAULT);
+            }
         }
         if (!err) {
             err = cuMemcpyHtoDAsync(
@@ -78,7 +83,7 @@ class Policy {
     }
 
     static ErrorType waitForEvents(QueueType queue, int nEvents,
-                                   EventType *events) {
+                                   EventType *events) noexcept {
         ErrorType err = CUDA_SUCCESS;
         for (int i = 0; i < nEvents; i++) {
             err = cuStreamWaitEvent(queue, events[i], 0);

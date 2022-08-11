@@ -9,9 +9,11 @@
 #pragma once
 
 #include <queue.hpp>
-#include <cstring>
 
 #include <common/err_common.hpp>
+
+#include <nonstd/span.hpp>
+#include <cstring>
 
 namespace cpu {
 
@@ -43,9 +45,11 @@ class Policy {
     }
     static ErrorType memcpyToDevice(QueueType &queue, MemoryType gpu_mem,
                                     MemoryType pinned_mem, size_t write_bytes,
-                                    size_t offset_bytes, EventType wait_event,
+                                    size_t offset_bytes,
+                                    nonstd::span<EventType> wait_events,
                                     EventType &write_event) {
-        if (wait_event) waitForEvents(queue, 1, &wait_event);
+        if (!wait_events.empty())
+            waitForEvents(queue, wait_events.size(), wait_events.data());
         queue->enqueue(memcpy, ((char *)gpu_mem + offset_bytes), pinned_mem,
                        write_bytes);
         if (write_event) write_event->mark(*queue);
