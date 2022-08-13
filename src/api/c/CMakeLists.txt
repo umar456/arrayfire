@@ -32,6 +32,7 @@ target_sources(c_api_interface
   ${ArrayFire_SOURCE_DIR}/include/af/index.h
   ${ArrayFire_SOURCE_DIR}/include/af/internal.h
   ${ArrayFire_SOURCE_DIR}/include/af/lapack.h
+  ${ArrayFire_SOURCE_DIR}/include/af/copy_engine.h
   ${ArrayFire_SOURCE_DIR}/include/af/macros.h
   ${ArrayFire_SOURCE_DIR}/include/af/ml.h
   ${ArrayFire_SOURCE_DIR}/include/af/memory.h
@@ -109,6 +110,7 @@ target_sources(c_api_interface
     ${CMAKE_CURRENT_SOURCE_DIR}/jit_test_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/join.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lu.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/copy_engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/match_template.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mean.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meanshift.cpp

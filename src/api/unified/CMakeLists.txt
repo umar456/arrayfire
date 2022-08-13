@@ -20,6 +20,7 @@ target_sources(af
     arith.cpp
     array.cpp
     blas.cpp
+    copy_engine.cpp
     data.cpp
     device.cpp
     error.cpp
@@ -42,6 +43,7 @@ target_sources(af
     symbol_manager.hpp
     util.cpp
     vision.cpp
+  )
 
     $<$<BOOL:${OpenCL_FOUND}>: ${CMAKE_CURRENT_SOURCE_DIR}/opencl.cpp>
     $<$<BOOL:${CUDA_FOUND}>: ${CMAKE_CURRENT_SOURCE_DIR}/cuda.cpp>

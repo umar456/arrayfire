@@ -22,7 +22,7 @@ class EventBase {
 
    public:
     /// Default constructor of the Event object. Does not create the event.
-    constexpr EventBase() noexcept : e_() {}
+    constexpr EventBase() noexcept : e_(0) {}
 
     /// Deleted copy constructor
     ///
@@ -42,7 +42,9 @@ class EventBase {
     }
 
     /// \brief Creates the event object by calling the native create API
-    ErrorType create() noexcept { return NativeEventPolicy::createEvent(&e_); }
+    ErrorType create() noexcept {
+        return NativeEventPolicy::createEvent(&e_);
+    }
 
     /// \brief Adds the event on the queue. Once this point on the program
     ///        is executed, the event is marked complete.

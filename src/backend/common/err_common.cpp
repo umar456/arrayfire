@@ -215,6 +215,8 @@ const char *af_err_to_string(const af_err err) {
         case AF_ERR_ARR_BKND_MISMATCH:
             return "There was a mismatch between an array and the current "
                    "backend";
+        case AF_ERR_COPY_ENGINE_TIMEOUT:
+            return "Copy engine returned because of a timeout";
         case AF_ERR_INTERNAL: return "Internal error";
         case AF_ERR_UNKNOWN: return "Unknown error";
     }

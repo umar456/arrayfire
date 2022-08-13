@@ -192,6 +192,14 @@ typedef enum {
     ///
     , AF_ERR_ARR_BKND_MISMATCH    = 503
 #endif
+#if AF_API_VERSION >= 39
+    ///
+    /// The loader returned from a blocking function before the operation
+    /// completed
+    ///
+    ,
+    AF_ERR_COPY_ENGINE_TIMEOUT = 601
+#endif
 
     // 900-999 Errors from upstream libraries and runtimes
 

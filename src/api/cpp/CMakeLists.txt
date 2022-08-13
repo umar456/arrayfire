@@ -47,6 +47,7 @@ target_sources(cpp_api_interface
     ${CMAKE_CURRENT_SOURCE_DIR}/internal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/jit_test_api.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lapack.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/copy_engine.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/matchTemplate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mean.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meanvar.cpp
