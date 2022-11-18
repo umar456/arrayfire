@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <CL/cl_ext_intel.h>
 #include <CL/sycl.hpp>
 #include <Param.hpp>
 #include <backend.hpp>
@@ -47,7 +48,7 @@ template<typename T>
 void evalMultiple(std::vector<Array<T> *> arrays);
 
 template<typename T>
-void evalNodes(Param<T> &out, common::Node *node);
+void evalNodes(Param<T> out, common::Node *node);
 
 template<typename T>
 void evalNodes(std::vector<Param<T>> &outputs,

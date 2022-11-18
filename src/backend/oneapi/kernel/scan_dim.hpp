@@ -120,7 +120,6 @@ class scanDimKernel {
             group_barrier(g);
 
             int start = 0;
-#pragma unroll
             for (int off = 1; off < DIMY_; off *= 2) {
                 if (lidy >= off)
                     val = binop(val, sptr[(start - off) * (int)THREADS_X]);

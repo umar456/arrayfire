@@ -8,6 +8,7 @@
  ********************************************************/
 
 #include <common/cast.hpp>
+#include <common/half.hpp>
 #include <handle.hpp>
 
 using common::half;
@@ -59,4 +60,4 @@ template detail::Array<intl> castArray(const af_array &in);
 template detail::Array<uintl> castArray(const af_array &in);
 template detail::Array<short> castArray(const af_array &in);
 template detail::Array<ushort> castArray(const af_array &in);
-template detail::Array<half> castArray(const af_array &in);
+template detail::Array<common::half> castArray(const af_array &in);

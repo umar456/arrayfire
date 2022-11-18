@@ -30,7 +30,6 @@ namespace oneapi {
 template<typename T>
 Array<T> createSelectNode(const Array<char> &cond, const Array<T> &a,
                           const Array<T> &b, const dim4 &odims) {
-    ONEAPI_NOT_SUPPORTED("createSelectNode Not supported");
 
     auto cond_node   = cond.getNode();
     auto a_node      = a.getNode();
@@ -60,7 +59,6 @@ Array<T> createSelectNode(const Array<char> &cond, const Array<T> &a,
 template<typename T, bool flip>
 Array<T> createSelectNode(const Array<char> &cond, const Array<T> &a,
                           const T &b_val, const dim4 &odims) {
-    ONEAPI_NOT_SUPPORTED("createSelectNode Not supported");
 
     auto cond_node   = cond.getNode();
     auto a_node      = a.getNode();

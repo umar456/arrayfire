@@ -34,6 +34,14 @@ using std::to_string;
 using std::tuple;
 using std::vector;
 
+TEST(JIT, haha) {
+  array a = constant(1, 10);
+  array b = constant(1, 10);
+  array c = a + b;
+  c.eval();
+  af::print("c", c);
+}
+
 TEST(JIT, CPP_JIT_HASH) {
     const int num     = 20;
     const float valA  = 3;

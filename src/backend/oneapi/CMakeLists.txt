@@ -7,6 +7,7 @@
 
 include(InternalUtils)
 include(build_cl2hpp)
+include(FileToString)
 
 add_library(afoneapi
   Array.cpp
@@ -230,6 +231,51 @@ target_sources(afoneapi
     kernel/where.hpp
 )
 
+
+add_library(afcuda_jit STATIC
+  ../cuda/jit.cpp
+  ../cuda/jit.hpp
+  ../cuda/Param.hpp
+)
+arrayfire_set_default_cxx_flags(afcuda_jit)
+
+set_target_properties(afcuda_jit
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    CXX_STANDARD 17
+    LANGUAGE CUDA
+    LINK_LANGUAGE CUDA)
+
+target_compile_definitions(afcuda_jit
+  PRIVATE
+    AF_CUDA
+    CUDA_NO_HALF
+)
+
+target_include_directories(afcuda_jit
+PUBLIC
+  $<BUILD_INTERFACE:${ArrayFire_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${ArrayFire_BINARY_DIR}/include>
+  $<INSTALL_INTERFACE:${AF_INSTALL_INC_DIR}>
+PRIVATE
+  $<$<BOOL:${AF_WITH_CUDNN}>:${cuDNN_INCLUDE_DIRS}>
+  ${CUDA_INCLUDE_DIRS}
+  ${ArrayFire_SOURCE_DIR}/src/api/c
+  ${CMAKE_CURRENT_SOURCE_DIR}/..
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cuda
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cuda/kernel
+  ${CMAKE_CURRENT_SOURCE_DIR}/../cuda/jit
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(afcuda_jit
+  PRIVATE
+    afcommon_interface
+  PUBLIC
+    ${CUDA_CUDA_LIBRARY}
+    ${CUDA_LIBRARIES}
+)
+
 add_library(ArrayFire::afoneapi ALIAS afoneapi)
 
 arrayfire_set_default_cxx_flags(afoneapi)
@@ -241,11 +287,20 @@ target_include_directories(afoneapi
     $<INSTALL_INTERFACE:${AF_INSTALL_INC_DIR}>
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cuda
+    ${CMAKE_CURRENT_BINARY_DIR}
     ${SYCL_INCLUDE_DIR}
   )
 
 target_compile_options(afoneapi
-  PRIVATE -fsycl)
+  PRIVATE
+    -fsycl
+    -fsycl-link
+    -fsycl-targets=nvptx64-nvidia-cuda
+    #-fsycl-force-target=nvptx64-nvidia-cuda-sm_86
+    -Wno-unknown-cuda-version
+    -sycl-std=2020
+)
 
 target_compile_definitions(afoneapi
   PRIVATE
@@ -253,11 +308,19 @@ target_compile_definitions(afoneapi
   )
 
 target_link_libraries(afoneapi
+  PUBLIC
+    -L/data/devel/arrayfire/build/src/backend/cuda
+    -lafcuda
   PRIVATE
+    #afcuda_jit
+    -fsycl
+    #-fsycl-link
+    #-fsycl-targets=nvptx64-nvidia-cuda-sm_86
+    #-fsycl-force-target=nvptx64-nvidia-cuda-sm_86
     c_api_interface
     cpp_api_interface
     afcommon_interface
-    -fsycl
+    -Wno-unknown-cuda-version
   )
 
 source_group(include REGULAR_EXPRESSION ${ArrayFire_SOURCE_DIR}/include/*)

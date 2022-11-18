@@ -48,8 +48,8 @@ class reduceFirstKernelSMEM {
                           To nanval, local_accessor<compute_t<To>, 1> s_val,
                           sycl::stream debug)
         : out_(out)
-        , oInfo_(oInfo)
         , in_(in)
+        , oInfo_(oInfo)
         , iInfo_(iInfo)
         , groups_x_(groups_x)
         , groups_y_(groups_y)
@@ -140,8 +140,8 @@ class reduceFirstKernelSMEM {
 
    protected:
     write_accessor<To> out_;
-    KParam oInfo_, iInfo_;
     read_accessor<Ti> in_;
+    KParam oInfo_, iInfo_;
     uint groups_x_, groups_y_, repeat_;
     bool change_nan_;
     To nanval_;

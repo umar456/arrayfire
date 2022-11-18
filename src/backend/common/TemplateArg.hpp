@@ -17,7 +17,7 @@
 #include <traits.hpp>
 
 template<typename T>
-class TemplateTypename;
+struct TemplateTypename;
 
 template<typename T>
 std::string toString(T value);

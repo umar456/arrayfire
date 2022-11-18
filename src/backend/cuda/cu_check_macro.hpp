@@ -26,5 +26,6 @@
         cuGetErrorString(res, &cu_err_string);                            \
         snprintf(cu_err_msg, sizeof(cu_err_msg), "CU Error %s(%d): %s\n", \
                  cu_err_name, (int)(res), cu_err_string);                 \
-        AF_ERROR(cu_err_msg, AF_ERR_INTERNAL);                            \
+        printf("PRINTERR: %s\n", cu_err_msg);\
+AF_ERROR(cu_err_msg, AF_ERR_INTERNAL);                            \
     } while (0)

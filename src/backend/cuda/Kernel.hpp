@@ -51,9 +51,6 @@ class Kernel
     : public common::KernelInterface<CUmodule, CUfunction, Enqueuer,
                                      CUdeviceptr> {
    public:
-    using ModuleType = CUmodule;
-    using KernelType = CUfunction;
-    using DevPtrType = CUdeviceptr;
     using BaseClass =
         common::KernelInterface<ModuleType, KernelType, Enqueuer, DevPtrType>;
 

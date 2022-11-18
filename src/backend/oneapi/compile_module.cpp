@@ -7,9 +7,10 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 
-#include <common/compile_module.hpp>  //compileModule & loadModuleFromDisk
-#include <common/kernel_cache.hpp>    //getKernel(Module&, ...)
+//#include <common/compile_module.hpp>  //compileModule & loadModuleFromDisk
+//#include <common/kernel_cache.hpp>    //getKernel(Module&, ...)
 
+#include <CL/cl_ext_intel.h>
 #include <CL/sycl.hpp>
 #include <common/Logger.hpp>
 #include <common/defines.hpp>
@@ -32,8 +33,6 @@ using common::loggerFactory;
 using fmt::format;
 // using oneapi::getActiveDeviceId;
 // using oneapi::getDevice;
-using oneapi::Kernel;
-using oneapi::Module;
 using spdlog::logger;
 using sycl::bundle_state;
 using sycl::kernel_bundle;
@@ -56,10 +55,10 @@ logger *getLogger() {
     return logger.get();
 }
 
-string getProgramBuildLog(const kernel_bundle<bundle_state::executable> &prog) {
-    ONEAPI_NOT_SUPPORTED("");
-    return "";
-}
+//string getProgramBuildLog(const kernel_bundle<bundle_state::executable> &prog) {
+//    ONEAPI_NOT_SUPPORTED("");
+//    return "";
+//}
 
 //#define THROW_BUILD_LOG_EXCEPTION(PROG)                              \
 //    do {                                                             \
@@ -100,8 +99,7 @@ kernel_bundle<bundle_state::executable> buildProgram(const vector<string>
 }  // namespace oneapi
 
 string getKernelCacheFilename(const int device, const string &key) {
-    ONEAPI_NOT_SUPPORTED("");
-    return "";
+    return "KER"+key+"_OAPI_A5500.bin";
 }
 
 namespace common {

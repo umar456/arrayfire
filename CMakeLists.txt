@@ -384,7 +384,7 @@ endif()
 set_target_properties(${built_backends} PROPERTIES
                       CXX_STANDARD 17
                       CXX_EXTENSIONS OFF
-                      CXX_VISIBILITY_PRESET hidden
+                      #CXX_VISIBILITY_PRESET hidden
                       VERSION "${ArrayFire_VERSION}"
                       SOVERSION "${ArrayFire_VERSION_MAJOR}")
 

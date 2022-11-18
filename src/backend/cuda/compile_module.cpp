@@ -44,6 +44,8 @@
 #include <af/defines.h>
 #include <af/version.h>
 
+#include <common/debug.hpp>
+
 #include <nvrtc.h>
 
 #include <algorithm>
@@ -96,7 +98,8 @@ constexpr size_t linkLogSize = 2048;
         snprintf(cu_err_msg.data(), cu_err_msg.size(),                  \
                  "CU Link Error %s(%d): %s\n", cu_err_name, (int)(res), \
                  linkError);                                            \
-        AF_ERROR(cu_err_msg.data(), AF_ERR_INTERNAL);                   \
+        printf("%s\n", cu_err_msg.data());\
+AF_ERROR(cu_err_msg.data(), AF_ERR_INTERNAL);                   \
     } while (0)
 
 #define NVRTC_CHECK(fn)                                                   \
@@ -299,9 +302,12 @@ Module compileModule(const string &moduleKey, span<const string> sources,
         reinterpret_cast<void *>(linkLogSize), reinterpret_cast<void *>(1)};
 
     auto link = high_resolution_clock::now();
+    DBGTRACE("haha");
     CU_LINK_CHECK(cuLinkCreate(5, linkOptions, linkOptionValues, &linkState));
+    DBGTRACE("haha");
     CU_LINK_CHECK(cuLinkAddData(linkState, CU_JIT_INPUT_PTX, (void *)ptx.data(),
                                 ptx.size(), moduleKey.c_str(), 0, NULL, NULL));
+    DBGTRACE("haha");
 
     void *cubin = nullptr;
     size_t cubinSize;
@@ -450,6 +456,8 @@ Module loadModuleFromDisk(const int device, const string &moduleKey,
             AF_ERROR("Module on disk seems to be corrupted", AF_ERR_LOAD_SYM);
         }
 
+        DBGTRACE("HAHAH");
+        SHOW(*cubin.data());
         CU_CHECK(cuModuleLoadData(&modOut, cubin.data()));
 
         AF_TRACE("{{{:<20} : loaded from {} for {} }}", moduleKey, cacheFile,
@@ -481,7 +489,9 @@ Kernel getKernel(const Module &mod, const string &nameExpr,
                  const bool sourceWasJIT) {
     std::string name  = (sourceWasJIT ? nameExpr : mod.mangledName(nameExpr));
     CUfunction kernel = nullptr;
+    SHOW(nameExpr);
     CU_CHECK(cuModuleGetFunction(&kernel, mod.get(), name.c_str()));
+    SHOW(nameExpr);
     return {nameExpr, mod.get(), kernel};
 }
 

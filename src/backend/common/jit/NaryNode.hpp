@@ -105,7 +105,7 @@ common::Node_ptr createNaryNode(
     std::array<common::Node_ptr, N> childNodes;
     std::array<common::Node *, N> nodes;
     for (int i = 0; i < N; i++) {
-        childNodes[i] = move(children[i]->getNode());
+        childNodes[i] = std::move(children[i]->getNode());
         nodes[i]      = childNodes[i].get();
     }
 
@@ -126,7 +126,7 @@ common::Node_ptr createNaryNode(
                 }
             }
             children[max_height_index]->eval();
-            return createNaryNode<Ti, N>(odims, createNode, move(children));
+            return createNaryNode<Ti, N>(odims, createNode, std::move(children));
         }
         case kJITHeuristics::MemoryPressure: {
             for (auto &c : children) { c->eval(); }  // TODO: use evalMultiple()

@@ -7,6 +7,8 @@
  * http://arrayfire.com/licenses/BSD-3-Clause
  ********************************************************/
 
+#include <jit.hpp>
+
 #include <Array.hpp>
 #include <Kernel.hpp>
 #include <common/half.hpp>
@@ -25,6 +27,8 @@
 #include <threadsMgt.hpp>
 #include <type_util.hpp>
 #include <af/dim4.hpp>
+
+#include <common/debug.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -302,30 +306,38 @@ static CUfunction getKernel(const vector<Node*>& output_nodes,
                             const bool is_linear, const bool loop0,
                             const bool loop1, const bool loop2,
                             const bool loop3) {
+  SHOW(*output_nodes[0]);
     const string funcName{getFuncName(output_nodes, full_nodes, full_ids,
                                       is_linear, loop0, loop1, loop2, loop3)};
+    SHOW(*output_nodes[0]);
     // A forward lookup in module cache helps avoid recompiling
     // the JIT source generated from identical JIT-trees.
     const auto entry{
         findModule(getActiveDeviceId(), deterministicHash(funcName))};
 
+    SHOW(*output_nodes[0]);
     if (!entry) {
         const string jitKer{getKernelString(funcName, full_nodes, full_ids,
                                             output_ids, is_linear, loop0, loop1,
                                             loop2, loop3)};
+        SHOW(jitKer);
         saveKernel(funcName, jitKer, ".cu");
+        SHOW(funcName);
 
         const common::Source jit_src{jitKer.c_str(), jitKer.size(),
                                      deterministicHash(jitKer)};
 
+        SHOW(funcName);
         return common::getKernel(funcName, std::array{jit_src}, {}, {}, true)
             .get();
     }
+    SHOW(funcName);
     return common::getKernel(entry, funcName, true).get();
 }
 
 template<typename T>
-void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
+void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes,
+               CUstream stream) {
     const unsigned nrOutputs{static_cast<unsigned>(output_nodes.size())};
     if (nrOutputs == 0) { return; }
     assert(outputs.size() == output_nodes.size());
@@ -373,7 +385,8 @@ void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
     const size_t outputSizeofType{size_of(outputType)};
     for (Node* node : output_nodes) {
         assert(node->getType() == outputType);
-        const int id = node->getNodesMap(nodes, full_nodes, full_ids);
+        printf("node: %p\n", node);
+        const int id = (node)->getNodesMap(nodes, full_nodes, full_ids);
         output_ids.push_back(id);
     }
 
@@ -475,12 +488,15 @@ void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
         for (Node_ptr& node : node_clones) { full_nodes.push_back(node.get()); }
     }
 
+    SHOW(*full_nodes[0]);
     threadsMgt<dim_t> th(outDims, ndims);
+    SHOW(*full_nodes[0]);
     const dim3 threads{th.genThreads()};
     const dim3 blocks{th.genBlocks(threads, nrInputs, nrOutputs, totalSize,
                                    outputSizeofType)};
     auto ker = getKernel(output_nodes, output_ids, full_nodes, full_ids,
                          is_linear, th.loop0, th.loop1, th.loop2, th.loop3);
+    SHOW(*full_nodes[0]);
 
     vector<void*> args;
     for (const Node* node : full_nodes) {
@@ -501,8 +517,8 @@ void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
             blocks.x * threads.x * blocks.y * threads.y * blocks.z * threads.z);
     }
     CU_CHECK(cuLaunchKernel(ker, blocks.x, blocks.y, blocks.z, threads.x,
-                            threads.y, threads.z, 0, getActiveStream(),
-                            args.data(), NULL));
+                            threads.y, threads.z, 0, stream, args.data(),
+                            NULL));
 
     // Reset the thread local vectors
     nodes.clear();
@@ -512,10 +528,15 @@ void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
 }
 
 template<typename T>
+void evalNodes(vector<Param<T>>& outputs, const vector<Node*>& output_nodes) {
+  evalNodes(outputs, output_nodes, getActiveStream());
+}
+
+template<typename T>
 void evalNodes(Param<T> out, Node* node) {
     vector<Param<T>> outputs{out};
     vector<Node*> nodes{node};
-    evalNodes(outputs, nodes);
+    evalNodes(outputs, nodes, getActiveStream());
 }
 
 template void evalNodes<float>(Param<float> out, Node* node);
@@ -530,7 +551,7 @@ template void evalNodes<intl>(Param<intl> out, Node* node);
 template void evalNodes<uintl>(Param<uintl> out, Node* node);
 template void evalNodes<short>(Param<short> out, Node* node);
 template void evalNodes<ushort>(Param<ushort> out, Node* node);
-template void evalNodes<half>(Param<half> out, Node* node);
+template void evalNodes<common::half>(Param<common::half> out, Node* node);
 
 template void evalNodes<float>(vector<Param<float>>& out,
                                const vector<Node*>& node);
@@ -540,8 +561,7 @@ template void evalNodes<cfloat>(vector<Param<cfloat>>& out,
                                 const vector<Node*>& node);
 template void evalNodes<cdouble>(vector<Param<cdouble>>& out,
                                  const vector<Node*>& node);
-template void evalNodes<int>(vector<Param<int>>& out,
-                             const vector<Node*>& node);
+template void evalNodes<int>(vector<Param<int>>& out, const vector<Node*>& node);
 template void evalNodes<uint>(vector<Param<uint>>& out,
                               const vector<Node*>& node);
 template void evalNodes<char>(vector<Param<char>>& out,

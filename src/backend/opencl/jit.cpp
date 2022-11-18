@@ -479,7 +479,7 @@ void evalNodes(vector<Param>& outputs, const vector<Node*>& output_nodes) {
     full_ids.clear();
 }
 
-void evalNodes(Param& out, Node* node) {
+void evalNodes(Param out, Node* node) {
     vector<Param> outputs{out};
     vector<Node*> nodes{node};
     return evalNodes(outputs, nodes);

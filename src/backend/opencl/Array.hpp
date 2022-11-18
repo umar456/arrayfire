@@ -43,7 +43,7 @@ class Array;
 template<typename T>
 void evalMultiple(std::vector<Array<T> *> arrays);
 
-void evalNodes(Param &out, common::Node *node);
+void evalNodes(Param out, common::Node *node);
 void evalNodes(std::vector<Param> &outputs,
                const std::vector<common::Node *> &nodes);
 
