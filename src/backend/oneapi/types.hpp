@@ -160,4 +160,33 @@ AF_CONSTEXPR const char *getTypeBuildDefinition() {
 }
 #endif
 
+unsigned getActiveDeviceId();
+bool isDoubleSupported(unsigned device);
+bool isHalfSupported(unsigned device);
+
+template<typename T>
+constexpr bool typeSupportedByDevice() {
+    if constexpr (std::is_same_v<double, T>) {
+        return isDoubleSupported(getActiveDeviceId());
+    } else if constexpr (std::is_same_v<common::half, T>) {
+        return isHalfSupported(getActiveDeviceId());
+    } else {
+        return true;
+    }
+}
+
+template<typename... Targs>
+class typeSupport {
+    static constexpr sycl::specialization_id<bool> typeSupported;
+
+   public:
+    typeSupport(sycl::handler &h) {
+        bool supported = (typeSupportedByDevice<Targs>() && ...);
+        h.set_specialization_constant<typeSupported>(supported);
+    }
+    bool operator()(sycl::kernel_handler &kh) const {
+        return kh.get_specialization_constant<typeSupported>();
+    }
+};
+
 }  // namespace oneapi
